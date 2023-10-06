@@ -13,6 +13,25 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\DepartmentController;
 
+
+use App\Http\Controllers\ActeDeGestionSinistresAtRdController;
+use App\Http\Controllers\ActeGestionDimController;
+use App\Http\Controllers\ActGestionController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\BrancheController;
+use App\Http\Controllers\BrancheDimController;
+use App\Http\Controllers\BranchSinistresAtRdController;
+use App\Http\Controllers\ChargeCompteController;
+use App\Http\Controllers\ChargeCompteDimController;
+use App\Http\Controllers\ChargeCompteSinistresController;
+use App\Http\Controllers\CompagnieController;
+use App\Http\Controllers\ProductionController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SinistreDimController;
+use App\Http\Controllers\SinistresAtRDController;
+use App\Http\Controllers\ResponsableController;
+use App\Http\Controllers\UserController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -25,12 +44,15 @@ use App\Http\Controllers\DepartmentController;
 */
 
 /** for side bar menu active */
-function set_active( $route ) {
-    if( is_array( $route ) ){
-        return in_array(Request::path(), $route) ? 'active' : '';
+if (!function_exists('set_active')) {
+    function set_active($route) {
+        if( is_array( $route ) ){
+            return in_array(Request::path(), $route) ? 'active' : '';
+        }
+        return Request::path() == $route ? 'active' : '';
     }
-    return Request::path() == $route ? 'active' : '';
 }
+
 
 Route::get('/', function () {
     return view('auth.login');
@@ -38,14 +60,20 @@ Route::get('/', function () {
 
 Route::group(['middleware'=>'auth'],function()
 {
-    Route::get('home',function()
+    Route::get('accueil',function()
     {
-        return view('home');
+        return view('accueil');
     });
-    Route::get('home',function()
+    Route::get('accueil',function()
     {
-        return view('home');
+        return view('accueil');
     });
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 Auth::routes();
@@ -55,63 +83,251 @@ Route::controller(LoginController::class)->group(function () {
     Route::get('/login', 'login')->name('login');
     Route::post('/login', 'authenticate');
     Route::get('/logout', 'logout')->name('logout');
-    Route::post('change/password', 'changePassword')->name('change/password');
+    Route::post('/change/password', 'changePassword')->name('change/password');
 });
 
 // ----------------------------- register -------------------------//
-Route::controller(RegisterController::class)->group(function () {
-    Route::get('/register', 'register')->name('register');
-    Route::post('/register','storeUser')->name('register');    
-});
+
+Route::middleware(['auth', 'role:responsable'])->group(function(){
+
+});// end group admin middleware
+
 
 // -------------------------- main dashboard ----------------------//
 Route::controller(HomeController::class)->group(function () {
-    Route::get('/home', 'index')->middleware('auth')->name('home');
+    Route::get('/accueil', 'index')->middleware('auth')->name('accueil');
     Route::get('user/profile/page', 'userProfile')->middleware('auth')->name('user/profile/page');
     Route::get('teacher/dashboard', 'teacherDashboardIndex')->middleware('auth')->name('teacher/dashboard');
     Route::get('student/dashboard', 'studentDashboardIndex')->middleware('auth')->name('student/dashboard');
+
+    Route::get('/fetch-monthly-production-data', 'fetchMonthlyProductionData')->middleware('auth')->name('fetch.production.data');
+    Route::get('/fetch-monthly-sinistres-dim-data', 'fetchMonthlySinistresDimData')->middleware('auth')->name('fetch.sinistresdim.data');
+    Route::get('/fetch-monthly-sinistres-at-rd-data', 'fetchMonthlySinistresAtRdData')->middleware('auth')->name('fetch.sinistresatrd.data');
 });
 
 // ----------------------------- user controller -------------------------//
-Route::controller(UserManagementController::class)->group(function () {
-    Route::get('list/users', 'index')->middleware('auth')->name('list/users');
-    Route::post('change/password', 'changePassword')->name('change/password');
-    Route::get('view/user/edit/{id}', 'userView')->middleware('auth');
-    Route::post('user/update', 'userUpdate')->name('user/update');
-    Route::post('user/delete', 'userDelete')->name('user/delete');
-});
+
 
 // ------------------------ setting -------------------------------//
-Route::controller(Setting::class)->group(function () {
-    Route::get('setting/page', 'index')->middleware('auth')->name('setting/page');
+// Route::controller(Setting::class)->group(function () {
+//     Route::get('setting/page', 'index')->middleware('auth')->name('setting/page');
+// });
+
+
+// =============
+
+Route::group(['middleware' => 'checkRole:Admin'], function () {
+    // Routes accessible only for Admin
+    // Add your routes here
 });
 
-// ------------------------ student -------------------------------//
-Route::controller(StudentController::class)->group(function () {
-    Route::get('student/list', 'student')->middleware('auth')->name('student/list'); // list student
-    Route::get('student/grid', 'studentGrid')->middleware('auth')->name('student/grid'); // grid student
-    Route::get('student/add/page', 'studentAdd')->middleware('auth')->name('student/add/page'); // page student
-    Route::post('student/add/save', 'studentSave')->name('student/add/save'); // save record student
-    Route::get('student/edit/{id}', 'studentEdit'); // view for edit
-    Route::post('student/update', 'studentUpdate')->name('student/update'); // update record student
-    Route::post('student/delete', 'studentDelete')->name('student/delete'); // delete record student
-    Route::get('student/profile/{id}', 'studentProfile')->middleware('auth'); // profile student
+Route::controller(UserManagementController::class)->group(function () {
+Route::get('/update-profile',  'profileUpdateForm')->middleware('auth')->name('update.profile.form');
+Route::post('/update-profile', 'updateProfile')->middleware('auth')->name('update.profile');
+Route::post('change/password', 'changePassword')->middleware('auth')->name('change/password');
 });
 
-// ------------------------ teacher -------------------------------//
-Route::controller(TeacherController::class)->group(function () {
-    Route::get('teacher/add/page', 'teacherAdd')->middleware('auth')->name('teacher/add/page'); // page teacher
-    Route::get('teacher/list/page', 'teacherList')->middleware('auth')->name('teacher/list/page'); // page teacher
-    Route::get('teacher/grid/page', 'teacherGrid')->middleware('auth')->name('teacher/grid/page'); // page grid teacher
-    Route::post('teacher/save', 'saveRecord')->middleware('auth')->name('teacher/save'); // save record
-    Route::get('teacher/edit/{id}', 'editRecord'); // view teacher record
-    Route::post('teacher/update', 'updateRecordTeacher')->middleware('auth')->name('teacher/update'); // update record
-    Route::post('teacher/delete', 'teacherDelete')->name('teacher/delete'); // delete record teacher
+
+Route::group(['middleware' => 'checkRole:Super Admin'], function () {
+    
+
+    Route::controller(RegisterController::class)->group(function () {
+        Route::get('/register', 'register')->name('register');
+        Route::post('/register','storeUser')->name('register');    
+    });
+
+
+    Route::controller(UserManagementController::class)->group(function () {
+        Route::get('liste/utilisateurs', 'index')->middleware('auth')->name('all.users');
+        Route::get('/ajouter/utilisateur', 'userAdd')->name('add.user');
+        Route::post('/store/utilisateur', 'userStore')->name('store.user');
+        Route::get('view/user/edit/{id}', 'userView')->middleware('auth');
+        Route::post('user/update', 'userUpdate')->name('user/update');
+        Route::post('user/delete', 'userDelete')->name('user/delete');
+       
+    });
+   // ------------------------ branches -------------------------------//
+
+ Route::controller(BrancheController::class)->group(function(){
+    Route::get('/tous/branches-production', 'AllBranches')->name('all.branches');
+    Route::get('/ajouter/branche-production', 'AddBranche')->name('add.branche');
+    Route::post('/store/branche-production', 'StoreBranche')->name('store.branche');
+    Route::get('/modifier/branche-production/{id}', 'EditBranche')->name('edit.branche');
+    Route::post('/update/branche-production', 'UpdateBranche')->name('update.branche');
+    Route::get('/delete/branche-production/{id}', 'DeleteBranche')->name('delete.branche');
 });
 
-// ----------------------- department -----------------------------//
-Route::controller(DepartmentController::class)->group(function () {
-    Route::get('department/list/page', 'departmentList')->middleware('auth')->name('department/list/page'); // department/list/page
-    Route::get('department/add/page', 'indexDepartment')->middleware('auth')->name('department/add/page'); // page add department
-    Route::get('department/edit/page', 'editDepartment')->middleware('auth')->name('department/edit/page'); // page add department
+// ------------------------ compagnies -------------------------------//
+
+Route::controller(CompagnieController::class)->group(function(){
+    Route::get('/tous/compagnies', 'AllCompagnies')->name('all.compagnies');
+    Route::get('/ajouter/compagnie', 'AddCompagnie')->name('add.compagnie');
+    Route::post('/store/compagnie', 'StoreCompagnie')->name('store.compagnie');
+    Route::get('/modifier/compagnie/{id}', 'EditCompagnie')->name('edit.compagnie');
+    Route::post('/update/compagnie', 'UpdateCompagnie')->name('update.compagnie');
+    Route::get('/delete/compagnie/{id}', 'DeleteCompagnie')->name('delete.compagnie');
+});
+
+// ------------------------ acte gestions -------------------------------//
+
+Route::controller(ActGestionController::class)->group(function(){
+    Route::get('/tous/acte-gestions-production', 'AllActGestions')->name('all.act_gestions');
+    Route::get('/ajouter/acte-gestion-production', 'AddActGestion')->name('add.act_gestion');
+    Route::post('/store/acte-gestion-production', 'StoreActGestion')->name('store.act_gestion');
+    Route::get('/modifier/acte-gestion-production/{id}', 'EditActGestion')->name('edit.act_gestion');
+    Route::post('/update/acte-gestion-production', 'UpdateActGestion')->name('update.act_gestion');
+    Route::get('/delete/acte-gestion-production/{id}', 'DeleteActGestion')->name('delete.act_gestion');
+});
+
+ // ------------------------ charge comptes -------------------------------//
+
+Route::controller(ChargeCompteController::class)->group(function(){
+    Route::get('/tous/charge-comptes-production', 'AllChargeComptes')->name('all.charge_comptes');
+    Route::get('/ajouter/charge-compte-production', 'AddChargeCompte')->name('add.charge_compte');
+    Route::post('/store/charge-compte-production', 'StoreChargeCompte')->name('store.charge_compte');
+    Route::get('/modifier/charge-compte-production/{id}', 'EditChargeCompte')->name('edit.charge_compte');
+    Route::post('/update/charge-compte-production', 'UpdateChargeCompte')->name('update.charge_compte');
+    Route::get('/delete/charge-compte-production/{id}', 'DeleteChargeCompte')->name('delete.charge_compte');
+});
+
+ // ================ Sinistres AT&RD Routes ================== //
+
+// ------------------------ branches -------------------------------//
+
+Route::controller(BranchSinistresAtRdController::class)->group(function(){
+    Route::get('/tous/branches-sinistres-at-rd', 'AllBranchesSinistresAtRd')->name('all.branches.sinistres');
+    Route::get('/ajouter/branche-sinistre-at-rd', 'AddBrancheSinistresAtRd')->name('add.branche.sinistre');
+    Route::post('/store/branche-sinistre-at-rd', 'StoreBrancheSinistresAtRd')->name('store.branche.sinistre');
+    Route::get('/modifier/branche-sinistre-at-rd/{id}', 'EditBrancheSinistresAtRd')->name('edit.branche.sinistre');
+    Route::post('/update/branche-sinistre-at-rd', 'UpdateBrancheSinistresAtRd')->name('update.branche.sinistre');
+    Route::get('/delete/branche-sinistre-at-rd/{id}', 'DeleteBrancheSinistresAtRd')->name('delete.branche.sinistre');
+});
+
+
+// ------------------------ acte gestions -------------------------------//
+
+Route::controller(ActeDeGestionSinistresAtRdController::class)->group(function(){
+    Route::get('/tous/acte-gestion-sinistres-at-rd', 'AllActeDeGestionSinistresAtRd')->name('all.acte.gestion.sinistres');
+    Route::get('/ajouter/acte-gestion-sinistre-at-rd', 'AddActeDeGestionSinistresAtRd')->name('add.acte.gestion.sinistre');
+    Route::post('/store/acte-gestion-sinistre-at-rd', 'StoreActeDeGestionSinistresAtRd')->name('store.acte.gestion.sinistre');
+    Route::get('/modifier/acte-gestion-sinistre-at-rd/{id}', 'EditActeDeGestionSinistresAtRd')->name('edit.acte.gestion.sinistre');
+    Route::post('/update/acte-gestion-sinistre-at-rd', 'UpdateActeDeGestionSinistresAtRd')->name('update.acte.gestion.sinistre');
+    Route::get('/delete/acte-gestion-sinistre-at-rd/{id}', 'DeleteActeDeGestionSinistresAtRd')->name('delete.acte.gestion.sinistre');
+});
+
+ // ------------------------ charge comptes -------------------------------//
+
+ Route::controller(ChargeCompteSinistresController::class)->group(function(){
+    Route::get('/tous/charge-compte-sinistres-at-rd', 'AllChargeCompteSinistres')->name('all.charge.compte.sinistres');
+    Route::get('/ajouter/charge-compte-sinistre-at-rd', 'AddChargeCompteSinistre')->name('add.charge.compte.sinistre');
+    Route::post('/store/charge-compte-sinistre-at-rd', 'StoreChargeCompteSinistre')->name('store.charge.compte.sinistre');
+    Route::get('/modifier/charge-compte-sinistre-at-rd/{id}', 'EditChargeCompteSinistre')->name('edit.charge.compte.sinistre');
+    Route::post('/update/charge_compte_sinistre-at-rd', 'UpdateChargeCompteSinistre')->name('update.charge.compte.sinistre');
+    Route::get('/delete/charge_compte_sinistre-at-rd/{id}', 'DeleteChargeCompteSinistre')->name('delete.charge.compte.sinistre');
+});
+
+  // ================ Sinistres DIM Routes ================== //
+
+// ------------------------ branches -------------------------------//
+
+Route::controller(BrancheDimController::class)->group(function(){
+    Route::get('/tous/branches-sinistre-dim', 'AllBranchesSinistresDim')->name('all.branches.sinistres.dim');
+    Route::get('/ajouter/branche-sinistre-dim', 'AddBranchesSinistresDim')->name('add.branche.sinistre.dim');
+    Route::post('/store/branche-sinistre-dim', 'StoreBranchesSinistresDim')->name('store.branche.sinistre.dim');
+    Route::get('/modifier/branche-sinistre-dim/{id}', 'EditBranchesSinistresDim')->name('edit.branche.sinistre.dim');
+    Route::post('/update/branche-sinistre-dim', 'UpdateBranchesSinistresDim')->name('update.branche.sinistre.dim');
+    Route::get('/delete/branche-sinistre-dim/{id}', 'DeleteBranchesSinistresDim')->name('delete.branche.sinistre.dim');
+});
+
+// ------------------------ acte gestions -------------------------------//
+
+Route::controller(ActeGestionDimController::class)->group(function(){
+    Route::get('/tous/acte-gestion-sinistres-dim', 'AllActeDeGestionSinistresDim')->name('all.acte.gestion.sinistres.dim');
+    Route::get('/ajouter/acte-gestion-sinistre-dim', 'AddActeDeGestionSinistreDim')->name('add.acte.gestion.sinistre.dim');
+    Route::post('/store/acte-gestion-sinistre-dim', 'StoreActeDeGestionSinistreDim')->name('store.acte.gestion.sinistre.dim');
+    Route::get('/modifier/acte-gestion-sinistre-dim/{id}', 'EditActeDeGestionSinistreDim')->name('edit.acte.gestion.sinistre.dim');
+    Route::post('/update/acte-gestion-sinistre-dim', 'UpdateActeDeGestionSinistreDim')->name('update.acte.gestion.sinistre.dim');
+    Route::get('/delete/acte-gestion-sinistre-dim/{id}', 'DeleteActeDeGestionSinistreDim')->name('delete.acte.gestion.sinistre.dim');
+});
+
+ // ------------------------ charge comptes -------------------------------//
+
+ Route::controller(ChargeCompteDimController::class)->group(function(){
+    Route::get('/tous/charge-compte-sinistres-dim', 'AllChargeCompteDim')->name('all.charge.compte.sinistres.dim');
+    Route::get('/ajouter/charge-compte-sinistre-dim', 'AddChargeCompteDim')->name('add.charge.compte.sinistre.dim');
+    Route::post('/store/charge-compte-sinistre-dim', 'StoreChargeCompteDim')->name('store.charge.compte.sinistre.dim');
+    Route::get('/modifier/charge-compte-sinistre-dim/{id}', 'EditChargeCompteDim')->name('edit.charge.compte.sinistre.dim');
+    Route::post('/update/charge-compte-sinistre-dim', 'UpdateChargeCompteDim')->name('update.charge.compte.sinistre.dim');
+    Route::get('/delete/charge-compte-sinistre-dim/{id}', 'DeleteChargeCompteDim')->name('delete.charge.compte.sinistre.dim');
+});
+
+});
+
+
+
+// =================
+
+// ================ Productions Routes ================== //
+
+
+
+    // ------------------------ productions -------------------------------//
+
+    Route::controller(ProductionController::class)->group(function(){
+        Route::get('/tous/productions', 'AllProductions')->name('all.productions');
+        Route::get('/filter/productions', 'FilterProduction')->name('filter.productions');
+        Route::get('/ajouter/production', 'AddProduction')->name('add.production');
+        Route::post('/store/production', 'StoreProduction')->name('store.production');
+        Route::get('/modifier/production/{id}', 'EditProduction')->name('edit.production');
+        Route::post('/update/production/{id}', 'UpdateProduction')->name('update.production');
+        Route::get('/Afficher/production/{id}', 'ShowProduction')->name('show.production');
+        Route::get('/delete/production/{id}', 'DeleteProduction')->name('delete.production');
+        
+        Route::get('/export-filtered-productions', 'ExportProductions')->name('export.filtered.productions');
+        Route::get('/reset-production', 'ResetProductionFilter')->name('reset.production');
+
+
+    });
+
+
+
+   
+
+// ------------------------ sinistres_at_rd -------------------------------//
+
+Route::controller(SinistresAtRDController::class)->group(function(){
+    Route::get('/tous/sinistres-at-rd', 'AllSinistres')->name('all.sinistres.at.rd');
+    Route::get('/filter/sinistres-at-rd', 'FilterSinistre')->name('filter.sinistres.at.rd');
+    Route::get('/ajouter/sinistre-at-rd', 'AddSinistre')->name('add.sinistre.at.rd');
+    Route::post('/store/sinistre-at-d', 'StoreSinistre')->name('store.sinistre.at.rd');
+    Route::get('/modifier/sinistre-at-rd/{id}', 'EditSinistre')->name('edit.sinistre.at.rd');
+    Route::get('/Afficher/sinistre-at-rd/{id}', 'ShowSinistre')->name('show.sinistre.at.rd');
+    Route::post('/update/sinistre-at-rd/{id}', 'UpdateSinistre')->name('update.sinistre.at.rd');
+    Route::get('/delete/sinistre-at-rd/{id}', 'DeleteSinistre')->name('delete.sinistre.at.rd');
+    
+    Route::get('/export/filtered-sinistres-at-rd', 'ExportSinistres')->name('export.filtered.sinistres.at.rd');
+    Route::get('/reset/sinistre-at-rd', 'ResetSinistreFilter')->name('reset.sinistres.at.rd');
+
+
+});
+
+
+
+  
+// ------------------------ sinistres_dim -------------------------------//
+
+Route::controller(SinistreDimController::class)->group(function(){
+    Route::get('/tous/sinistres-dim', 'AllSinistreDim')->name('all.sinistres.dim');
+    Route::get('/filter/sinistres-dim', 'FilterSinistreDim')->name('filter.sinistres.dim');
+    Route::get('/ajouter/sinistre-dim', 'AddSinistreDim')->name('add.sinistre.dim');
+    Route::post('/store/sinistre-dim', 'StoreSinistreDim')->name('store.sinistre.dim');
+    Route::get('/modifier/sinistre-dim/{id}', 'EditSinistreDim')->name('edit.sinistre.dim');
+    Route::get('/Afficher/sinistre-dim/{id}', 'ShowSinistreDim')->name('show.sinistre.dim');
+    Route::post('/update/sinistre-dim/{id}', 'UpdateSinistreDim')->name('update.sinistre.dim');
+    Route::get('/delete/sinistre-dim/{id}', 'DeleteSinistreDim')->name('delete.sinistre.dim');
+    
+    Route::get('/export-filtered-sinistres', 'ExportSinistreDim')->name('export.filtered.sinistres.dim');
+    Route::get('/reset-sinistre-dim', 'ResetSinistreDimFilter')->name('reset.sinistres.dim');
+
+
 });

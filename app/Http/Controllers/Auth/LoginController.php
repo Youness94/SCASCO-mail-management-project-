@@ -63,6 +63,7 @@ class LoginController extends Controller
         $request->validate([
             'email'    => 'required|string',
             'password' => 'required|string',
+            
         ]);
         
         DB::beginTransaction();
@@ -81,11 +82,11 @@ class LoginController extends Controller
                 Session::put('phone_number', $user->phone_number);
                 Session::put('status', $user->status);
                 Session::put('role_name', $user->role_name);
-                Session::put('avatar', $user->avatar);
+                Session::put('photo', $user->photo);
                 Session::put('position', $user->position);
                 Session::put('department', $user->department);
                 Toastr::success('Login successfully :)','Success');
-                return redirect()->intended('home');
+                return redirect()->intended('accueil');
             } else {
                 Toastr::error('fail, WRONG USERNAME OR PASSWORD :)','Error');
                 return redirect('login');
@@ -110,7 +111,7 @@ class LoginController extends Controller
         $request->session()->forget('phone_number');
         $request->session()->forget('status');
         $request->session()->forget('role_name');
-        $request->session()->forget('avatar');
+        $request->session()->forget('photo');
         $request->session()->forget('position');
         $request->session()->forget('department');
         $request->session()->flush();
@@ -119,4 +120,28 @@ class LoginController extends Controller
         return redirect('login');
     }
 
+    public function changePassword(Request $request)
+    {
+        $request->validate([
+            'current_password'      => ['required', new MatchOldPassword],
+            'new_password'          => ['required', 'min:8', 'different:current_password'],
+            'new_confirm_password'  => ['required', 'same:new_password'],
+        ]);
+
+        try {
+            // Get the authenticated user
+            $user = Auth::user();
+
+            // Update the user's password
+            $user->update(['password' => Hash::make($request->new_password)]);
+
+            Toastr::success('Password changed successfully :)', 'Success');
+            return redirect()->back();
+        } catch (\Exception $e) {
+            Toastr::error('Failed to change password :(', 'Error');
+            return redirect()->back();
+        }
+    }
 }
+
+

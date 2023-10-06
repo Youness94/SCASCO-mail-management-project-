@@ -1,6 +1,9 @@
-
 @extends('layouts.master')
 @section('content')
+            @php        
+              $id = Auth::user()->id;
+              $users = App\Models\User::find($id);
+            @endphp
 <div class="page-wrapper">
     <div class="content container-fluid">
         <div class="page-header">
@@ -8,31 +11,29 @@
                 <div class="col">
                     <h3 class="page-title">Profile</h3>
                     <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('accueil') }}">Dashboard</a></li>
                         <li class="breadcrumb-item active">Profile</li>
                     </ul>
                 </div>
             </div>
         </div>
-
+           
         <div class="row">
             <div class="col-md-12">
                 <div class="profile-header">
                     <div class="row align-items-center">
                         <div class="col-auto profile-image">
                             <a href="#">
-                                <img class="rounded-circle" alt="{{ Session::get('name') }}" src="/images/{{ Session::get('avatar') }}">
+                            <img class="rounded-circle" src="{{ (!empty($users->photo)) ? asset('upload/admin_images/'.$users->photo) : asset('/images/photo_defaults.jpg') }}" alt="profile" width="31">
+
                             </a>
                         </div>
                         <div class="col ms-md-n2 profile-user-info">
-                            <h4 class="user-name mb-0">{{ Session::get('name') }}</h4>
+                            <h1 class="user-name mb-0">{{ Session::get('name') }}</h1><br>
                             <h6 class="text-muted">{{ Session::get('position') }}</h6>
-                            <div class="user-Location"><i class="fas fa-map-marker-alt"></i> Combodai Phnom Penh</div>
-                            <div class="about-text">Lorem ipsum dolor sit amet.</div>
+                            <div class="user-Location">{{ Session::get('role_name') }}</div>
                         </div>
-                        <div class="col-auto profile-btn">
-                            <a href="" class="btn btn-primary">Edit</a>
-                        </div>
+                        
                     </div>
                 </div>
                 <div class="profile-menu">
@@ -52,71 +53,118 @@
                             <div class="col-lg-9">
                                 <div class="card">
                                     <div class="card-body">
-                                        <h5 class="card-title d-flex justify-content-between">
-                                            <span>Personal Details</span>
-                                            <a class="edit-link" data-bs-toggle="modal"
-                                                href="#edit_personal_details"><i
-                                                    class="far fa-edit me-1"></i>Edit</a>
-                                        </h5>
-                                        <div class="row">
-                                            <p class="col-sm-3 text-muted text-sm-end mb-0 mb-sm-3">Name</p>
-                                            <p class="col-sm-9">{{ Session::get('name') }}</p>
-                                        </div>
-                                        <div class="row">
-                                            <p class="col-sm-3 text-muted text-sm-end mb-0 mb-sm-3">Date of Birth</p>
-                                            <p class="col-sm-9">24 Jul 1983</p>
-                                        </div>
-                                        <div class="row">
-                                            <p class="col-sm-3 text-muted text-sm-end mb-0 mb-sm-3">Email</p>
-                                            <p class="col-sm-9"><a href="/cdn-cgi/l/email-protection"
-                                                    class="__cf_email__"
-                                                    data-cfemail="a1cbcec9cfc5cec4e1c4d9c0ccd1cdc48fc2cecc">{{ Session::get('email') }}</a>
-                                            </p>
-                                        </div>
-                                        <div class="row">
-                                            <p class="col-sm-3 text-muted text-sm-end mb-0 mb-sm-3">Mobile</p>
-                                            <p class="col-sm-9">{{ Session::get('phone_number') }}</p>
-                                        </div>
-                                        <div class="row">
-                                            <p class="col-sm-3 text-muted text-sm-end mb-0">Address</p>
-                                            <p class="col-sm-9 mb-0">4663 Agriculture Lane,<br>
-                                                Miami,<br>
-                                                Florida - 33165,<br>
-                                                United States.</p>
-                                        </div>
+                                        <form method="POST" action="{{ route('update.profile') }}" enctype="multipart/form-data">
+                                            @csrf
+                                            <input type="hidden" class="form-control" name="user_id" value="{{ $users->user_id }}">
+                                            <h5 class="card-title d-flex justify-content-between">
+                                                <span>Données Personnelles</span>
+                                            </h5>
+                                            <div class="row">
+                                                <label for="name" class="col-md-4 col-form-label text-md-right">{{ __('Nom') }}</label>
+                                                <input id="name" type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ $users->name }}" required autocomplete="name" autofocus>
+                                                @error('name')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                                @enderror
+                                            </div>
+                                            <div class="row">
+                                                <label for="email" class="col-md-4 col-form-label text-md-right">{{ __('Adresse Électronique') }}</label>
+                                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ $users->email }}" required autocomplete="email">
+
+                                                @error('email')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                                @enderror
+                                            </div>
+                                            <div class="row">
+                                                <label for="position" class="col-md-4 col-form-label text-md-right">{{ __('Poste') }}</label>
+                                                <input id="position" type="text" class="form-control @error('position') is-invalid @enderror" name="position" value="{{  $users->position }}" required>
+
+                                                @error('position')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                                @enderror
+                                            </div>
+                                            <div class="row">
+                                                <label for="phone_number" class="col-md-4 col-form-label text-md-right">{{ __('Numéro de Téléphone') }}</label>
+                                                <input id="phone_number" type="text" class="form-control @error('phone_number') is-invalid @enderror" name="phone_number" value="{{ $users->phone_number }}" required>
+
+                                                @error('phone_number')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                                @enderror
+                                            </div>
+                                            <div class="row">
+                                                <label for="department" class="col-md-4 col-form-label text-md-right">{{ __('Département') }}</label>
+                                                <input id="department" type="text" class="form-control @error('department') is-invalid @enderror" name="department" value="{{ $users->department }}" required>
+
+                                                @error('department')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                                @enderror
+                                            </div>
+                                            <div class="row">
+                                                <label  class="col-md-4 col-form-label text-md-right">{{ __('Photo') }}</label>
+                                                <input id="image" type="file" class="form-control @error('photo') is-invalid @enderror" name="photo">
+
+                                                @error('photo')
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
+                                                @enderror
+                                            </div><br>
+                                            <div class="row">
+                                            <div class="mb-3">
+                                                <label class="form-label" for="formFile"></label>
+                                                <img id='showImage' class="rounded-circle" src="{{ (!empty($users->photo)) ? url('upload/admin_images/'.$users->photo) : url('images/photo_defaults.jpg')}}" alt="profile" width="120">
+                                            </div>
+                                            </div>
+                                            <br>
+                                            <div class="row">
+                                                <div class="form-group row mb-0">
+                                                    <div class="col-md-6 offset-md-4">
+                                                        <button type="submit" class="btn btn-primary">
+                                                            {{ __('Mettre à Jour le Profil') }}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                     </div>
                                 </div>
                             </div>
+
+                            </form>
+
+                            <script type="text/javascript">
+                                $(document).ready(function() {
+                                    $('#image').change(function(e) {
+                                        var reader = new FileReader();
+                                        reader.onload = function(e) {
+                                            $("#showImage").attr('src', e.target.result);
+                                        }
+                                        reader.readAsDataURL(e.target.files[0]);
+                                    })
+                                })
+                            </script>
                             <div class="col-lg-3">
 
                                 <div class="card">
                                     <div class="card-body">
                                         <h5 class="card-title d-flex justify-content-between">
                                             <span>Account Status</span>
-                                            <a class="edit-link" href="#"><i class="far fa-edit me-1"></i>Edit</a>
+                                            <!-- <a class="edit-link" href="#"><i class="far fa-edit me-1"></i>Edit</a> -->
                                         </h5>
-                                        <button class="btn btn-success" type="button"><i class="fe fe-check-verified"></i> Active</button>
+                                        <button class="btn btn-success" type="button"><i class="fe fe-check-verified"></i> {{ Session::get('status') }}</button>
                                     </div>
                                 </div>
 
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title d-flex justify-content-between">
-                                            <span>Skills </span>
-                                            <a class="edit-link" href="#"><i class="far fa-edit me-1"></i>Edit</a>
-                                        </h5>
-                                        <div class="skill-tags">
-                                            <span>Html5</span>
-                                            <span>CSS3</span>
-                                            <span>WordPress</span>
-                                            <span>Javascript</span>
-                                            <span>Android</span>
-                                            <span>iOS</span>
-                                            <span>Angular</span>
-                                            <span>PHP</span>
-                                        </div>
-                                    </div>
-                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -133,28 +181,28 @@
                                                 <label>Old Password</label>
                                                 <input type="password" class="form-control @error('current_password') is-invalid @enderror" name="current_password" value="{{ old('current_password') }}">
                                                 @error('current_password')
-                                                    <span class="invalid-feedback" role="alert">
-                                                        <strong>{{ $message }}</strong>
-                                                    </span>
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
                                                 @enderror
                                             </div>
-                                           
+
                                             <div class="form-group">
                                                 <label>New Password</label>
                                                 <input type="password" class="form-control @error('new_password') is-invalid @enderror" name="new_password" value="{{ old('new_password') }}">
                                                 @error('new_password')
-                                                    <span class="invalid-feedback" role="alert">
-                                                        <strong>{{ $message }}</strong>
-                                                    </span>
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
                                                 @enderror
                                             </div>
                                             <div class="form-group">
                                                 <label>Confirm Password</label>
                                                 <input type="password" class="form-control @error('new_confirm_password') is-invalid @enderror" name="new_confirm_password" value="{{ old('new_confirm_password') }}">
                                                 @error('new_confirm_password')
-                                                    <span class="invalid-feedback" role="alert">
-                                                        <strong>{{ $message }}</strong>
-                                                    </span>
+                                                <span class="invalid-feedback" role="alert">
+                                                    <strong>{{ $message }}</strong>
+                                                </span>
                                                 @enderror
                                             </div>
                                             <button type="submit" class="btn btn-primary">Save Changes</button>
