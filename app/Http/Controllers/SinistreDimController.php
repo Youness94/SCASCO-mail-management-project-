@@ -17,7 +17,7 @@ class SinistreDimController extends Controller
     public function AllSinistreDim()
     {
 
-        $sinistres_dim = SinistreDim::with('branches_dim', 'compagnies', 'acte_de_gestion_dim', 'charge_compte_dim')->get();
+        $sinistres_dim = SinistreDim::with('branches_dim', 'compagnies', 'acte_de_gestion_dim', 'charge_compte_dim')->orderBy('created_at', 'desc')->get();
         return view('sinistresdim.list-sinistresdim', compact('sinistres_dim'));
     }
 
@@ -108,7 +108,6 @@ class SinistreDimController extends Controller
             'compagnie_id' => 'required|exists:compagnies,id',
             'acte_gestion_dim_id' => 'required|exists:acte_gestions_dim,id',
             'charge_compte_dim_id' => 'required|exists:charges_comptes_dim,id',
-
             'nom_assure' => 'required|string',
             'num_declaration' => 'required|string',
             'nom_adherent' => 'required|string',
@@ -117,47 +116,50 @@ class SinistreDimController extends Controller
             'date_traitement' => 'required|date',
             'observation' => 'nullable|string',
         ]);
-
+    
         // Calculate the delai_traitement while excluding weekends
         $delaiTraitement = $this->calculateDelaiTraitement(
             $validatedData['date_remise'],
             $validatedData['date_traitement']
         );
-
-        $sinistres_dim = new SinistreDim($validatedData);
-
-        $sinistres_dim->branche_dim_id = $validatedData['branche_dim_id'];
-        $sinistres_dim->compagnie_id = $validatedData['compagnie_id'];
-        $sinistres_dim->acte_gestion_dim_id = $validatedData['acte_gestion_dim_id'];
-        $sinistres_dim->charge_compte_dim_id = $validatedData['charge_compte_dim_id'];
-
+    
         // Create a new Production instance
         $sinistres_dim = new SinistreDim([
-            'branche_dim_id' => $request->branche_dim_id,
-            'compagnie_id' => $request->compagnie_id,
-            'acte_gestion_dim_id' => $request->acte_gestion_dim_id,
-            'charge_compte_dim_id' => $request->charge_compte_dim_id,
-            'nom_assure' => $request->nom_assure,
-            'num_declaration' => $request->num_declaration,
-            'nom_adherent' => $request->nom_adherent,
-            'date_reception' => $request->date_reception,
-            'date_remise' => $request->date_remise,
-            'date_traitement' => $request->date_traitement,
-            'observation' => $request->observation,
+            'branche_dim_id' => $validatedData['branche_dim_id'],
+            'compagnie_id' => $validatedData['compagnie_id'],
+            'acte_gestion_dim_id' => $validatedData['acte_gestion_dim_id'],
+            'charge_compte_dim_id' => $validatedData['charge_compte_dim_id'],
+            'nom_assure' => $validatedData['nom_assure'],
+            'num_declaration' => $validatedData['num_declaration'],
+            'nom_adherent' => $validatedData['nom_adherent'],
+            'date_reception' => $validatedData['date_reception'],
+            'date_remise' => $validatedData['date_remise'],
+            'date_traitement' => $validatedData['date_traitement'],
+            'observation' => isset($validatedData['observation']) ? $validatedData['observation'] : null,
             'delai_traitement' => $delaiTraitement,
-
-            
         ]);
-
+    
         $sinistres_dim->user_id = auth()->user()->id;
-
+    
         // Save the Production record
         $sinistres_dim->save();
-
+    
         // Redirect to the index page or another appropriate page
         return redirect('/tous/sinistres-dim')->with('success', 'Production record created successfully');
     }
 
+//  'branche_dim_id' => $request->branche_dim_id,
+//             'compagnie_id' => $request->compagnie_id,
+//             'acte_gestion_dim_id' => $request->acte_gestion_dim_id,
+//             'charge_compte_dim_id' => $request->charge_compte_dim_id,
+//     'nom_assure' => $request->nom_assure,
+//             'num_declaration' => $request->num_declaration,
+//             'nom_adherent' => $request->nom_adherent,
+//             'date_reception' => $request->date_reception,
+//             'date_remise' => $request->date_remise,
+//             'date_traitement' => $request->date_traitement,
+//             'observation' => $request->observation,
+//             'delai_traitement' => $delaiTraitement,
 
     private function calculateDelaiTraitement($dateRemise, $dateTraitement)
     {

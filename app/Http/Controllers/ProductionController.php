@@ -26,7 +26,7 @@ class ProductionController extends Controller
         // $act_gestions = ActGestion::all();
         // $charge_comptes = ChargeCompte::all();
 
-        $productions = Production::with('branches', 'compagnies', 'act_gestions', 'charge_comptes')->get();
+        $productions = Production::with('branches', 'compagnies', 'act_gestions', 'charge_comptes')->orderBy('created_at', 'desc')->get();
         return view('production.list-production', compact('productions'));
     }
    
@@ -260,7 +260,8 @@ public function ResetProductionFilter()
         'date_reception' => $validatedData['date_reception'],
         'date_remise' => $validatedData['date_remise'],
         'date_traitement' => $validatedData['date_traitement'],
-        'observation' => $validatedData['observation'],
+        // 'observation' => $validatedData['observation'],
+        'observation' => isset($validatedData['observation']) ? $validatedData['observation'] : null,
         'delai_traitement' => $delaiTraitement, // Update delai_traitement
     ]);
 

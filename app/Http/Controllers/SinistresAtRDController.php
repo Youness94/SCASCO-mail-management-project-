@@ -18,7 +18,7 @@ class SinistresAtRDController extends Controller
     {
 
 
-        $sinistres = Sinistre::with('branches_sinistres', 'compagnies', 'acte_de_gestion_sinistres', 'charge_compte_sinistres')->get();
+        $sinistres = Sinistre::with('branches_sinistres', 'compagnies', 'acte_de_gestion_sinistres', 'charge_compte_sinistres')->orderBy('created_at', 'desc')->get();
         return view('sinistresatrd.list-sinistresatrd', compact('sinistres'));
     }
 
@@ -138,7 +138,7 @@ class SinistresAtRDController extends Controller
             'date_reception' => $validatedData['date_reception'],
             'date_remise' => $validatedData['date_remise'],
             'date_traitement' => $validatedData['date_traitement'],
-            'observation' => $validatedData['observation'],
+            'observation' => isset($validatedData['observation']) ? $validatedData['observation'] : null,
             'delai_traitement' => $delaiTraitement,
         ]);
     
@@ -223,7 +223,7 @@ class SinistresAtRDController extends Controller
             'date_reception' => $validatedData['date_reception'],
             'date_remise' => $validatedData['date_remise'],
             'date_traitement' => $validatedData['date_traitement'],
-            'observation' => $validatedData['observation'],
+            'observation' => isset($validatedData['observation']) ? $validatedData['observation'] : null,
             'delai_traitement' => $delaiTraitement,
         ]);
 

@@ -8,16 +8,16 @@
         <div class="page-header">
             <div class="row align-items-center">
                 <div class="col">
-                    <h3 class="page-title">Sinistres AT&RD</h3>
+                    <h3 class="page-title">Sinistres DIM</h3>
                     <ul class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ route('accueil') }}">Tableau de Bord</a></li>
-                        <li class="breadcrumb-item active">Sinistres AT&RD</li>
+                        <li class="breadcrumb-item active">Sinistres DIM</li>
                     </ul>
                 </div>
             </div>
         </div>
         @if (Session::get('role_name') === 'Super Admin')
-        <form method="GET" action="/filter/sinistres_dim">
+        <form method="GET" action="/filter/sinistres-dim">
             <div class=" row group-form d-flex justify-content-end ">
                 <div class="row">
                     <div class="col-lg-3 col-md-4">

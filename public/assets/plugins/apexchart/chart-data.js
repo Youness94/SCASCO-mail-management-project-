@@ -215,7 +215,16 @@ $(document).ready(function () {
                   toolbar: { show: false },
                },
                dataLabels: {
-                  enabled: false
+                  enabled: true,
+                  formatter: function (val) {
+                     return val;
+                     // return val === 1 ? val + " production" : val + " productions";
+                  },
+                  offsetY: 10, // Adjust the offset to position the labels properly
+                  style: {
+                     fontSize: '20px',
+                     colors: ["#FFFFFF"]
+                  }
                },
                plotOptions: {
                   bar: { columnWidth: '55%', endingShape: 'flat' },
@@ -302,7 +311,16 @@ $(document).ready(function () {
                      toolbar: { show: false },
                   },
                   dataLabels: {
-                     enabled: false
+                     enabled: true,
+                     formatter: function (val) {
+                        return val;
+                        // return val === 1 ? val + " Sinistre DIM" : val + " Sinistres DIM";
+                     },
+                     offsetY: 10, // Adjust the offset to position the labels properly
+                     style: {
+                        fontSize: '20px',
+                        colors: ["#FFFFFF"]
+                     }
                   },
                   plotOptions: {
                      bar: { columnWidth: '55%', endingShape: 'flat' },
@@ -390,7 +408,16 @@ $(document).ready(function () {
                      toolbar: { show: false },
                   },
                   dataLabels: {
-                     enabled: false
+                     enabled: true,
+                     formatter: function (val) {
+                        return val;
+                        // return val === 1 ? val + " Sinistre AT&RD" : val + " Sinistres AT&RD";
+                     },
+                     offsetY: 10, // Adjust the offset to position the labels properly
+                     style: {
+                        fontSize: '20px',
+                        colors: ["#FFFFFF"]
+                     }
                   },
                   plotOptions: {
                      bar: { columnWidth: '55%', endingShape: 'flat' },
@@ -457,10 +484,50 @@ $(document).ready(function () {
 
    //end chart sinistres at and rd 
 
-   
+  
 
-
-
+   $(document).ready(function () {
+      // Variable to store the chart instance
+      var chartPie;
+      var last12MonthsDate = new Date();
+      last12MonthsDate.setMonth(last12MonthsDate.getMonth() - 12);
+  
+      function fetchAndRefreshChart() {
+          $.ajax({
+              url: '/pie-chart',
+              method: 'GET',
+              dataType: 'json',
+              data: { startDate: last12MonthsDate.toISOString() },
+              success: function (response) {
+               console.log(response);
+                  new Chart(document.getElementById("pieChart"), {
+                      type: "pie",
+                      data: {
+                          labels: response.labels,
+                          datasets: [{
+                           data: response.values,
+                          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                          
+                       }]
+                      },
+                      options: {
+                          maintainAspectRatio: false,
+                          cutoutPercentage: 65,
+                          
+                      }
+                  });
+              },
+              error: function (error) {
+                  console.error('Error fetching data:', error);
+              }
+          });
+      }
+  
+      fetchAndRefreshChart();
+  
+      // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
+      setInterval(fetchAndRefreshChart, 30000);
+  });
 
 
 // ==============================

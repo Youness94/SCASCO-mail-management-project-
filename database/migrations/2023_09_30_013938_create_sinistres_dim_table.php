@@ -28,7 +28,7 @@ return new class extends Migration
             $table->date('date_remise');
             $table->date('date_traitement');
             $table->integer('delai_traitement')->nullable();
-            $table->text('observation');
+            $table->text('observation')->nullable();
 
             $table->foreignId('user_id')->constrained('users');
             $table->timestamps();

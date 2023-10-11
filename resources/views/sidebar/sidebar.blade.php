@@ -9,7 +9,7 @@
                 <li class="nav-item">
                     <a href="{{route('accueil')}}" class="nav-link">
                         <i class="link-icon" data-feather="box"></i>
-                        <span class="link-title">Dashboard</span>
+                        <span class="link-title">Tableau de Bord</span>
                     </a>
                 </li>
 

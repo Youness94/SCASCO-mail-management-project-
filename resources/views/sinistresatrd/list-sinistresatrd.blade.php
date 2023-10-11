@@ -17,7 +17,7 @@
             </div>
         </div>
         @if (Session::get('role_name') === 'Super Admin')
-        <form method="GET" action="/filter/sinistres_at_rd">
+        <form method="GET" action="/filter/sinistres-at-rd">
             <div class=" row group-form d-flex justify-content-end ">
                 <div class="row">
                     <div class="col-lg-3 col-md-4">

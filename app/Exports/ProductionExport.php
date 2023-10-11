@@ -28,8 +28,8 @@ class ProductionExport implements FromQuery, WithHeadings
             'compagnies.nom AS company_name',
             'act_gestions.nom AS acte_gestion_name',
             'charge_comptes.nom AS charge_compte_name',
-            'productions.date_traitement',
             'productions.date_remise',
+            'productions.date_traitement',
             'productions.delai_traitement',
             'productions.observation',
         ])
@@ -44,16 +44,16 @@ class ProductionExport implements FromQuery, WithHeadings
     public function headings(): array
     {
         return [
-            'ID',
-            'Date Reception',
-            'Nom Police',
-            'Nom Assure',
+            '#',
+            'Date de Réception',
+            'N° de police',
+            'Nom Assuré',
             'Branche',
-            'Company',
-            'Acte Gestion',
-            'Charge Compte',
-            'Date de traitement',
+            'Compagnie',
+            'Acte de gestion',
+            'Chargé de compte',
             'Date de remise',
+            'Date de traitement',
             'Délai de traitement',
             'Observation'
             
@@ -71,8 +71,8 @@ class ProductionExport implements FromQuery, WithHeadings
             $production->compagnies-> nom ?? '', // Assumes you have a 'compagnies' relationship in your Production model
             $production->act_gestions-> nom ?? '', // Assumes you have an 'act_gestions' relationship in your Production model
             $production->charge_comptes-> nom ?? '', // Assumes you have a 'charge_comptes' relationship in your Production model
-            $production->date_traitement,
             $production->date_remise,
+            $production->date_traitement,
             $production->delai_traitement,
             $production->observation,
             // Add more data fields as needed

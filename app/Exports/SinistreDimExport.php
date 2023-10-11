@@ -31,8 +31,8 @@ class SinistreDimExport implements FromQuery, WithHeadings
             'compagnies.nom AS company_name',
             'acte_gestions_dim.nom AS acte_gestion_name',
             'charges_comptes_dim.nom AS charge_compte_name',
-            'sinistres_dim.date_traitement',
             'sinistres_dim.date_remise',
+            'sinistres_dim.date_traitement',
             'sinistres_dim.delai_traitement',
             'sinistres_dim.observation'
         ])
@@ -47,19 +47,19 @@ class SinistreDimExport implements FromQuery, WithHeadings
     public function headings(): array
     {
         return [
-            'ID',
-            'Date Reception',
+            '#',
+            'Date de Réception',
             'N° de déclaration',
             'Nom Assuré',
             'Nom Adhèrent',
             'Branche',
-            'Company',
-            'Acte Gestion',
-            'Charge Compte',
-            'Date de traitement',
+            'Compagnie',
+            'Acte de gestion',
+            'Chargé de compte',
             'Date de remise',
+            'Date de traitement',
             'Délai de traitement',
-
+            'Observations',
             
             // Add more columns as needed
         ];
@@ -76,10 +76,10 @@ class SinistreDimExport implements FromQuery, WithHeadings
             $sinistre_dim->compagnies->nom, // Assumes you have a 'compagnies' relationship in your Production model
             $sinistre_dim->acte_de_gestion_dim->nom, // Assumes you have an 'act_gestions' relationship in your Production model
             $sinistre_dim->charge_compte_dim->nom, // Assumes you have a 'charge_comptes' relationship in your Production model
-            $sinistre_dim->date_traitement,
             $sinistre_dim->date_remise,
+            $sinistre_dim->date_traitement,
             $sinistre_dim->delai_traitement,
-
+            $sinistre_dim->observation,
             
             // Add more data fields as needed
         ];

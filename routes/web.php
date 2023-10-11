@@ -103,6 +103,7 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/fetch-monthly-production-data', 'fetchMonthlyProductionData')->middleware('auth')->name('fetch.production.data');
     Route::get('/fetch-monthly-sinistres-dim-data', 'fetchMonthlySinistresDimData')->middleware('auth')->name('fetch.sinistresdim.data');
     Route::get('/fetch-monthly-sinistres-at-rd-data', 'fetchMonthlySinistresAtRdData')->middleware('auth')->name('fetch.sinistresatrd.data');
+    Route::get('/pie-chart', 'pieChart')->middleware('auth')->name('pie.chart');
 });
 
 // ----------------------------- user controller -------------------------//

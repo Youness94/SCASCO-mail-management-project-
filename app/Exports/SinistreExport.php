@@ -41,8 +41,8 @@ class SinistreExport implements FromQuery, WithHeadings
             'compagnies.nom AS company_name',
             'acte_de_gestion_sinistres.nom AS acte_gestion_name',
             'charge_compte_sinistres.nom AS charge_compte_name',
-            'sinistres.date_traitement',
             'sinistres.date_remise',
+            'sinistres.date_traitement',
             'sinistres.delai_traitement',
             'sinistres.observation',
 
@@ -59,18 +59,18 @@ class SinistreExport implements FromQuery, WithHeadings
     public function headings(): array
     {
         return [
-            'ID',
-            'Date Reception',
-            'Nom Police',
-            'Nom Assure',
-            'Numero Sinistre',
-            'Nom Victime',
+            '#',
+            'Date de Réception',
+            'N° de police',
+            'N° de sinistre',
+            'Nom Assuré',
+            'Nom de la victime',
             'Branche',
-            'Company',
-            'Acte Gestion',
-            'Charge Compte',
-            'Date de traitement',
+            'Compagnie',
+            'Acte de gestion',
+            'Chargé de compte',
             'Date de remise',
+            'Date de traitement',
             'Délai de traitement',
             'Observation'
 
@@ -91,8 +91,8 @@ class SinistreExport implements FromQuery, WithHeadings
             $sinistre->compagnies -> nom ?? '', // Get the 'nom' attribute from the related 'compagnies' model
             $sinistre->acte_de_gestion_sinistres -> nom ?? '', // Get the 'nom' attribute from the related 'acte_de_gestion_sinistres' model
             $sinistre->charge_compte_sinistres -> nom ?? '', // Get the 'nom' attribute from the related 'charge_compte_sinistres' model
-            $sinistre->date_traitement,
             $sinistre->date_remise,
+            $sinistre->date_traitement,
             $sinistre->delai_traitement,
             $sinistre->observation,
             

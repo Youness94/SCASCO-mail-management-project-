@@ -71,6 +71,18 @@ class HomeController extends Controller
     
         return response()->json($sinistres_at_rd);
     }
+
+    public function pieChart()
+{
+    $productionCount = Production::count();
+    $sinistreCount = Sinistre::count();
+    $sinistreDimCount = SinistreDim::count();
+
+    return response()->json([
+        'labels' => ['Productions', 'Sinistres AT&RD', 'Sinistres DIM'],
+        'values' => [$productionCount, $sinistreCount, $sinistreDimCount], // Changed 'data' to 'values'
+    ]);
+}
     // ===================
 
 
