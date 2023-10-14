@@ -25,7 +25,7 @@ return new class extends Migration
             $table->foreignId('charge_compte_id')->constrained('charge_comptes');
 
             $table->date('date_remise');
-            $table->date('date_traitement');
+            $table->date('date_traitement')->nullable();
             $table->integer('delai_traitement')->nullable();
             $table->text('observation')->nullable();
 

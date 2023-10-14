@@ -25,11 +25,14 @@ use App\Http\Controllers\ChargeCompteController;
 use App\Http\Controllers\ChargeCompteDimController;
 use App\Http\Controllers\ChargeCompteSinistresController;
 use App\Http\Controllers\CompagnieController;
+use App\Http\Controllers\ProductioDetailsController;
 use App\Http\Controllers\ProductionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SinistreDimController;
 use App\Http\Controllers\SinistresAtRDController;
 use App\Http\Controllers\ResponsableController;
+use App\Http\Controllers\SinisterAtRdDetailsController;
+use App\Http\Controllers\SinisterDimDetailsController;
 use App\Http\Controllers\UserController;
 
 /*
@@ -104,6 +107,7 @@ Route::controller(HomeController::class)->group(function () {
     Route::get('/fetch-monthly-sinistres-dim-data', 'fetchMonthlySinistresDimData')->middleware('auth')->name('fetch.sinistresdim.data');
     Route::get('/fetch-monthly-sinistres-at-rd-data', 'fetchMonthlySinistresAtRdData')->middleware('auth')->name('fetch.sinistresatrd.data');
     Route::get('/pie-chart', 'pieChart')->middleware('auth')->name('pie.chart');
+
 });
 
 // ----------------------------- user controller -------------------------//
@@ -131,6 +135,50 @@ Route::post('change/password', 'changePassword')->middleware('auth')->name('chan
 
 Route::group(['middleware' => 'checkRole:Super Admin'], function () {
     
+    Route::controller(ProductioDetailsController::class)->group(function () {
+        Route::get('/production-details', 'showProductionDetails')->name('show.production.details');
+        Route::get( '/production-chart-date-remise','getProductionChartDateRemise')->name('get.production.chart.date.remise');    
+        Route::get( '/production-chart-date-traitement','getProductionChartDateTraitement')->name('get.production.chart.date.traitement');
+        Route::get( '/production-chart-date-traitement-null','getProductionChartDateTraitementNull')->name('get.production.chart.date.traitement.null');
+        Route::get( '/production-chart-delai-traitement','calculateMeanDelaiTraitement')->name('get.production.chart.delai.traitement.null');
+
+        Route::get( '/production-chart-charge-compte-last-month','getProductionChartByChargeCompte')->name('get.production.chart.charge.compte.last.month');
+        Route::get( '/production-chart-charge-compte-last-twelve-month','getProductionChartChargeCompteTwelve')->name('get.production.chart.charge.compte.last.twelve.month');
+        Route::get( '/calculate-mean-delai-traitement-by-charge-compte','getMeanDelaiTraitementByChargeCompte')->name('get.production.chart.charge.compte.delai.traitement');
+        Route::get('/production-act-gestion-group-month', 'getActGestionProductionCategorie')->name('production.act.gestion.group.month');
+        Route::get('/production-act-gestion-group-twelve-month', 'ActGestionProductionCategorieTwelveMonths')->name('production.act.gestion.group.twelve.month');
+        
+        Route::get('/production-act-gestion-group-average-month', 'gestionProductionCategorieAverageCurrentMonth')->name('production.act.gestion.group.average.month');
+    });
+   
+
+    Route::controller(SinisterAtRdDetailsController::class)->group(function () {
+        Route::get('/sinister-at-rd-details', 'showSinisterAtRdDetails')->name('show.sinister.at.rd.details');
+        Route::get( '/sinister-at-rd-chart-date-remise','SinisterAtRdChartDateRemise')->name('sinister.at.rd.chart.date.remise');    
+        Route::get( '/sinister-at-rd-chart-date-traitement','SinisterAtRdChartDateTraitement')->name('sinister.at.rd.chart.date.traitement');
+        Route::get( '/sinister-at-rd-chart-date-traitement-null','SinisterAtRdChartDateTraitementNull')->name('sinister.at.rd.chart.date.traitement.null');
+        Route::get( '/sinister-at-rd-chart-delai-traitement','calculateMeanDelaiTraitementSinisterAtRd')->name('sinister-at-rd.chart.delai.traitement.null');
+
+        Route::get( '/sinister-at-rd-chart-charge-compte-last-month','SinisterAtRdChartByChargeCompte')->name('sinister.at.rd.chart.charge.compte.last.month');
+        Route::get( '/sinister-at-rd-chart-charge-compte-last-twelve-month','SinisterAtRdChartChargeCompteTwelve')->name('sinister.at.rd.chart.charge.compte.last.twelve.month');
+        Route::get( '/sinister-at-rd-mean-delai-traitement-by-charge-compte','SinisterAtRdMeanDelaiTraitementByChargeCompte')->name('sinister.at.rd.chart.charge.compte.delai.traitement');
+    });
+
+    Route::controller(SinisterDimDetailsController::class)->group(function () {
+        Route::get('/sinister-dim-details', 'showSinisterDimDetails')->name('show.sinister.dim.details');
+        Route::get( '/sinister-dim-chart-date-remise','SinisterDimChartDateRemise')->name('sinister.dim.chart.date.remise');    
+        Route::get( '/sinister-dim-chart-date-traitement','SinisterDimChartDateTraitement')->name('sinister.dim.chart.date.traitement');
+        Route::get( '/sinister-dim-chart-date-traitement-null','SinisterDimChartDateTraitementNull')->name('sinister.dim.chart.date.traitement.null');
+        Route::get( '/sinister-dim-chart-delai-traitement','calculateMeanDelaiTraitementSinisterDim')->name('sinister-at-rd.chart.delai.traitement.null');
+
+        Route::get( '/sinister-dim-chart-charge-compte-last-month','SinisterDimChartByChargeCompte')->name('sinister.dim.chart.charge.compte.last.month');
+        Route::get( '/sinister-dim-chart-charge-compte-last-twelve-month','SinisterDimChartChargeCompteTwelve')->name('sinister.dim.chart.charge.compte.last.twelve.month');
+        Route::get( '/sinister-dim-mean-delai-traitement-by-charge-compte','SinisterDimMeanDelaiTraitementByChargeCompte')->name('sinister.dim.chart.charge.compte.delai.traitement');
+
+        
+    });
+
+
 
     Route::controller(RegisterController::class)->group(function () {
         Route::get('/register', 'register')->name('register');
@@ -261,6 +309,8 @@ Route::controller(ActeGestionDimController::class)->group(function(){
     Route::post('/update/charge-compte-sinistre-dim', 'UpdateChargeCompteDim')->name('update.charge.compte.sinistre.dim');
     Route::get('/delete/charge-compte-sinistre-dim/{id}', 'DeleteChargeCompteDim')->name('delete.charge.compte.sinistre.dim');
 });
+
+
 
 });
 

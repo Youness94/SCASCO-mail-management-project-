@@ -147,7 +147,7 @@ public function ResetProductionFilter()
             'nom_police' => 'required|string',
             'date_reception' => 'required|date',
             'date_remise' => 'required|date',
-            'date_traitement' => 'required|date',
+            'date_traitement' => 'nullable|date',
             'observation' => 'nullable|string',
         ]);
 
@@ -238,7 +238,7 @@ public function ResetProductionFilter()
         'nom_police' => 'required|string',
         'date_reception' => 'required|date',
         'date_remise' => 'required|date',
-        'date_traitement' => 'required|date',
+        'date_traitement' => 'nullable|date',
         'observation' => 'nullable|string',
     ]);
 
@@ -259,7 +259,7 @@ public function ResetProductionFilter()
         'nom_police' => $validatedData['nom_police'],
         'date_reception' => $validatedData['date_reception'],
         'date_remise' => $validatedData['date_remise'],
-        'date_traitement' => $validatedData['date_traitement'],
+        'date_traitement' =>  isset($validatedData['date_traitement']) ? $validatedData['date_traitement'] : null, 
         // 'observation' => $validatedData['observation'],
         'observation' => isset($validatedData['observation']) ? $validatedData['observation'] : null,
         'delai_traitement' => $delaiTraitement, // Update delai_traitement
@@ -277,7 +277,10 @@ public function ResetProductionFilter()
         return redirect('/tous/productions')->with('success', 'Production deleted successfully');
     }
     // ==============
+    
   
+// Production details ============== //
+
 
 
 }

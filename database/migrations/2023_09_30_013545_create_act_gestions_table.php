@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('act_gestions', function (Blueprint $table) {
             $table->id();
             $table->string('nom');
+            $table->string('categorie')->nullable();
             $table->foreignId('user_id')->constrained('users'); 
             $table->timestamps();
         });
