@@ -113,7 +113,7 @@ class SinistreDimController extends Controller
             'nom_adherent' => 'required|string',
             'date_reception' => 'required|date',
             'date_remise' => 'required|date',
-            'date_traitement' => 'required|date',
+            'date_traitement' => 'nullable|date',
             'observation' => 'nullable|string',
         ]);
     
@@ -204,7 +204,7 @@ class SinistreDimController extends Controller
             'nom_adherent' => 'required|string',
             'date_reception' => 'required|date',
             'date_remise' => 'required|date',
-            'date_traitement' => 'required|date',
+            'date_traitement' => 'nullable|date',
             'observation' => 'nullable|string',
 
            
@@ -230,7 +230,7 @@ class SinistreDimController extends Controller
             'nom_adherent' => $validatedData['nom_adherent'],
             'date_reception' => $validatedData['date_reception'],
             'date_remise' => $validatedData['date_remise'],
-            'date_traitement' => $validatedData['date_traitement'],
+            'date_traitement' =>  isset($validatedData['date_traitement']) ? $validatedData['date_traitement'] : null, 
             'observation' => $validatedData['observation'],
             'delai_traitement' => $delaiTraitement,
 

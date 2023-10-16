@@ -38,7 +38,7 @@
                                     <div class="form-group local-forms">
                                         <label>Categorie <span class="login-danger">*</span></label>
                                         <select class="form-control select @error('categorie') is-invalid @enderror" name="categorie" id="categorie">
-                                            <option selected disabled>Categorie Name</option>
+                                            <option selected disabled>Categorie</option>
                                             @foreach ($categories as $categorie)
                                             <option value="{{ $categorie->categorie_name }}" {{ old('categorie', $act_gestions->categorie) == $categorie->categorie_name ? 'selected' : '' }}>
                                                 {{ $categorie->categorie_name }}

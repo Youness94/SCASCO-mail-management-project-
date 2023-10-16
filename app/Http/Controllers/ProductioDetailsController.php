@@ -244,86 +244,84 @@ class ProductioDetailsController extends Controller
 
 
 
-public function getActGestionProductionCategorie()
+
+public function getTotalActGestionByCategoryMonth()
 {
     // Calculate the date range for the current month
     $currentMonthStart = now()->startOfMonth();
     $currentMonthEnd = now()->endOfMonth();
 
-    // Retrieve data for the chart using Eloquent relationships
-    $actGestionData = Production::with('act_gestions')
-        ->whereBetween('date_remise', [$currentMonthStart, $currentMonthEnd])
-        ->whereNotNull('delai_traitement')
-        ->get(['act_gestion_id', 'delai_traitement']);
+    // Join 'act_gestions' table with 'productions' and filter by date range
+    $result = DB::table('act_gestions')
+        ->leftJoin('productions', 'act_gestions.id', '=', 'productions.act_gestion_id')
+        ->whereBetween('productions.date_remise', [$currentMonthStart, $currentMonthEnd])
+        ->select('act_gestions.categorie', DB::raw('count(*) as total'))
+        ->groupBy('act_gestions.categorie')
+        ->get();
 
-    // Initialize an array to store the organized data
-    $chartData = [];
-
-    foreach ($actGestionData as $record) {
-        $categorieName = optional($record->act_gestions)->categorie ?? 'Unknown';
-
-        // Increment the total delai_traitement for each category
-        $chartData[$categorieName] = ($chartData[$categorieName] ?? 0) + $record->delai_traitement;
-    }
+    // Transform the result into an associative array
+    $chartData = $result->pluck('total', 'categorie')->toArray();
 
     return response()->json($chartData);
 }
 
-public function ActGestionProductionCategorieTwelveMonths()
+
+public function getTotalActGestionByCategoryTwelveMonths()
 {
+    // Calculate the date range for the last twelve months
+    $lastTwelveMonthsStart = now()->subMonths(12)->startOfMonth();
+    $currentMonthEnd = now()->endOfMonth();
+
+    // Join 'act_gestions' table with 'productions' and filter by date range
+    $result = DB::table('act_gestions')
+        ->leftJoin('productions', 'act_gestions.id', '=', 'productions.act_gestion_id')
+        ->whereBetween('productions.date_remise', [$lastTwelveMonthsStart, $currentMonthEnd])
+        ->select('act_gestions.categorie', DB::raw('count(*) as total'))
+        ->groupBy('act_gestions.categorie')
+        ->get();
+
+    // Transform the result into an associative array
+    $chartData = $result->pluck('total', 'categorie')->toArray();
+
+    return response()->json($chartData);
+}
+
+
+public function getAverageActGestionByCategory()
+{
+    // Calculate the date range for the current month
+    $currentMonthStart = now()->startOfMonth();
+    $currentMonthEnd = now()->endOfMonth();
+
     // Calculate the date range for the last 12 months
-    $last12MonthsStart = now()->subMonths(11)->startOfMonth();
-    $currentMonthEnd = now()->endOfMonth();
+    $lastTwelveMonthsStart = now()->subMonths(12)->startOfMonth();
+    $lastTwelveMonthsEnd = now()->endOfMonth();
 
-    // Retrieve data for the chart using Eloquent relationships
-    $actGestionData = Production::with('act_gestions')
-        ->whereBetween('date_remise', [$last12MonthsStart, $currentMonthEnd])
-        ->whereNotNull('delai_traitement')
-        ->get(['act_gestion_id', 'delai_traitement']);
+    // Get the average for the current month
+    $currentMonthAverage = $this->getAverageByCategory($currentMonthStart, $currentMonthEnd);
 
-    // Initialize an array to store the organized data
-    $chartData = [];
+    // Get the average for the last 12 months
+    $lastTwelveMonthsAverage = $this->getAverageByCategory($lastTwelveMonthsStart, $lastTwelveMonthsEnd);
 
-    foreach ($actGestionData as $record) {
-        $categorieName = optional($record->act_gestions)->categorie ?? 'Unknown';
-
-        // Increment the count for each category
-        $chartData[$categorieName] = ($chartData[$categorieName] ?? 0) + 1;
-    }
-
-    return response()->json($chartData);
+    return response()->json([
+        'current_month_average' => $currentMonthAverage,
+        'last_twelve_months_average' => $lastTwelveMonthsAverage,
+    ]);
 }
 
-public function gestionProductionCategorieAverageCurrentMonth()
+private function getAverageByCategory($startDate, $endDate)
 {
-    // Calculate the date range for the current month
-    $currentMonthStart = now()->startOfMonth();
-    $currentMonthEnd = now()->endOfMonth();
+    // Join 'act_gestions' table with 'productions' and filter by date range
+    $result = DB::table('act_gestions')
+        ->leftJoin('productions', 'act_gestions.id', '=', 'productions.act_gestion_id')
+        ->whereBetween('productions.date_remise', [$startDate, $endDate])
+        ->select('act_gestions.categorie', DB::raw('avg(productions.act_gestion_id) as average'))
+        ->groupBy('act_gestions.categorie')
+        ->get();
 
-    // Retrieve data for the chart using Eloquent relationships
-    $actGestionData = Production::with('act_gestions')
-        ->whereBetween('date_remise', [$currentMonthStart, $currentMonthEnd])
-        ->whereNotNull('delai_traitement')
-        ->get(['act_gestion_id', 'delai_traitement']);
+    // Transform the result into an associative array
+    $averageData = $result->pluck('average', 'categorie')->toArray();
 
-    // Initialize an array to store the organized data
-    $chartData = [];
-
-    foreach ($actGestionData as $record) {
-        $categorieName = optional($record->act_gestions)->categorie ?? 'Unknown';
-
-        // Increment the count for each category
-        $chartData[$categorieName]['count'] = ($chartData[$categorieName]['count'] ?? 0) + 1;
-
-        // Add delai_traitement to the total for each category
-        $chartData[$categorieName]['total'] = ($chartData[$categorieName]['total'] ?? 0) + $record->delai_traitement;
-    }
-
-    // Calculate the average for each category
-    foreach ($chartData as $categorieName => $data) {
-        $chartData[$categorieName]['average'] = $data['count'] > 0 ? $data['total'] / $data['count'] : 0;
-    }
-
-    return response()->json($chartData);
+    return $averageData;
 }
 }

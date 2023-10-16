@@ -35,6 +35,9 @@
                     <ul>
                         <li><a href="{{ route('all.productions') }}">Productions</a></li>
                         <li><a href="{{ route('add.production') }}">Ajouter production</a></li>
+                        @if (Session::get('role_name') === 'Super Admin')
+                        <li><a href="{{ route('show.production.details') }}">Détails de production</a></li>
+                        @endif
                     </ul>
                 </li>
                 <li class="submenu">
@@ -45,6 +48,9 @@
                     <ul>
                         <li><a href="{{ route('all.sinistres.at.rd') }}">Sinistres AT & RD</a></li>
                         <li><a href="{{ route('add.sinistre.at.rd') }}">Ajoutr sinistre AT & RD</a></li>
+                        @if (Session::get('role_name') === 'Super Admin')
+                        <li><a href="{{ route('show.sinister.at.rd.details') }}">Détails de sinistre AT&RD</a></li>
+                        @endif
                     </ul>
                 </li>
                 <li class="submenu">
@@ -55,6 +61,9 @@
                     <ul>
                         <li><a href="{{ route('all.sinistres.dim') }}">Sinistres DIM</a></li>
                         <li><a href="{{ route('add.sinistre.dim') }}">Ajouter sinistre DIM</a></li>
+                        @if (Session::get('role_name') === 'Super Admin')
+                        <li><a href="{{ route('show.sinister.dim.details') }}">Détails de sinistre DIM</a></li>
+                        @endif
                     </ul>
                 </li>
                 @if (Session::get('role_name') === 'Super Admin')

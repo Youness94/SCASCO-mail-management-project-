@@ -47,7 +47,7 @@
                         <div class="page-header">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <h3 class="page-title">Sinistres AT&RD</h3>
+                                    <h3 class="page-title">Sinistres DIM</h3>
                                 </div>
                                 <div class="col-auto text-end float-end ms-auto download-grp">
                                     @if(isset($date_debut) && isset($date_fin) && $dataExists)

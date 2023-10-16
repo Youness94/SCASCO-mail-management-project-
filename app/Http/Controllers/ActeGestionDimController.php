@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ActeGestionDim;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ActeGestionDimController extends Controller
 {
@@ -15,32 +16,36 @@ class ActeGestionDimController extends Controller
 
     public function AddActeDeGestionSinistreDim()
     {
+        $categories = DB::table('actes_gestion_sinister_dim_categorie')->get();
         $acte_gestions_dim = ActeGestionDim::latest()->get();
-        return view('actegestiondim.add-actegestiondim', compact('acte_gestions_dim'));
+        return view('actegestiondim.add-actegestiondim', compact('acte_gestions_dim', 'categories'));
         
     }
 
     public function StoreActeDeGestionSinistreDim(Request $request)
     {
-
-        $validatedData = $request->validate([
+        $request->validate([
             'nom' => 'required|string|max:100',
+            'categorie' => 'nullable|string',
             // Add more validation rules for other fields
         ]);
     
-        // Check if the user is authenticated before accessing the id property
         $user = auth()->user();
     
         if ($user) {
-            $acte_gestions_dim = new ActeGestionDim($validatedData);
-            $acte_gestions_dim->user_id = $user->id; // Associate the act_gestion with the logged-in user
+            $acte_gestions_dim = new ActeGestionDim([
+                'nom' => $request->input('nom'),
+                'categorie' => $request->input('categorie'),
+            ]);
+    
+            $acte_gestions_dim->user()->associate($user);
             $acte_gestions_dim->save();
     
             return redirect('/tous/acte-gestion-sinistres-dim')->with('success', 'Acte Gestion created successfully');
         } else {
-            // Handle the case where the user is not authenticated
             return redirect()->back()->with('error', 'User not authenticated');
         }
+
       
     }
 
@@ -53,21 +58,31 @@ class ActeGestionDimController extends Controller
     public function EditActeDeGestionSinistreDim($id)
     {
         $acte_gestions_dim = ActeGestionDim::findOrFail($id);
-        return view('actegestiondim.edit-actegestiondim', compact('acte_gestions_dim'));
+        $categories = DB::table('actes_gestion_sinister_dim_categorie')->get();
+        return view('actegestiondim.edit-actegestiondim', compact('acte_gestions_dim', 'categories'));
     }
 
    
     public function UpdateActeDeGestionSinistreDim(Request $request, ActeGestionDim $acte_gestions_dim)
     {
-    
-        
-        $act_sin = $request->id;
-        ActeGestionDim::findOrFail($act_sin)->update([
-            'nom' => $request->nom,
-            
-            
+        $request->validate([
+            'nom' => 'required|string|max:100',
+            'categorie' => 'nullable|string',
             // Add more validation rules for other fields
         ]);
+        $act_sin = $request->id;
+        $act_gestion_sin = ActeGestionDim::findOrFail($act_sin);
+    
+        $act_gestion_sin->update([
+            'nom' => $request->nom,
+            'categorie' => $request->categorie,
+            // Add more fields as needed
+        ]);
+    
+        $act_gestion_sin->user_id = auth()->user()->id;
+        $act_gestion_sin->save();
+        
+       
         $acte_gestions_dim->user_id = auth()->user()->id;
         
 

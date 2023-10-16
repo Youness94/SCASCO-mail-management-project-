@@ -26,7 +26,7 @@ return new class extends Migration
             $table->foreignId('branche_dim_id')->constrained('branches_dim');
 
             $table->date('date_remise');
-            $table->date('date_traitement');
+            $table->date('date_traitement')->nullable();
             $table->integer('delai_traitement')->nullable();
             $table->text('observation')->nullable();
 

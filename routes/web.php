@@ -145,10 +145,11 @@ Route::group(['middleware' => 'checkRole:Super Admin'], function () {
         Route::get( '/production-chart-charge-compte-last-month','getProductionChartByChargeCompte')->name('get.production.chart.charge.compte.last.month');
         Route::get( '/production-chart-charge-compte-last-twelve-month','getProductionChartChargeCompteTwelve')->name('get.production.chart.charge.compte.last.twelve.month');
         Route::get( '/calculate-mean-delai-traitement-by-charge-compte','getMeanDelaiTraitementByChargeCompte')->name('get.production.chart.charge.compte.delai.traitement');
-        Route::get('/production-act-gestion-group-month', 'getActGestionProductionCategorie')->name('production.act.gestion.group.month');
-        Route::get('/production-act-gestion-group-twelve-month', 'ActGestionProductionCategorieTwelveMonths')->name('production.act.gestion.group.twelve.month');
+       
+        Route::get('/total-act-gestion-by-categorie-month', 'getTotalActGestionByCategoryMonth')->name('production.act.gestion.group.month');
+        Route::get('/total-act-gestion-by-category-twelve-month', 'getTotalActGestionByCategoryTwelveMonths')->name('production.act.gestion.group.twelve.month');
         
-        Route::get('/production-act-gestion-group-average-month', 'gestionProductionCategorieAverageCurrentMonth')->name('production.act.gestion.group.average.month');
+        Route::get('/production-act-gestion-group-average-month', 'getAverageActGestionByCategory')->name('production.act.gestion.group.average.month');
     });
    
 
@@ -162,6 +163,11 @@ Route::group(['middleware' => 'checkRole:Super Admin'], function () {
         Route::get( '/sinister-at-rd-chart-charge-compte-last-month','SinisterAtRdChartByChargeCompte')->name('sinister.at.rd.chart.charge.compte.last.month');
         Route::get( '/sinister-at-rd-chart-charge-compte-last-twelve-month','SinisterAtRdChartChargeCompteTwelve')->name('sinister.at.rd.chart.charge.compte.last.twelve.month');
         Route::get( '/sinister-at-rd-mean-delai-traitement-by-charge-compte','SinisterAtRdMeanDelaiTraitementByChargeCompte')->name('sinister.at.rd.chart.charge.compte.delai.traitement');
+
+        Route::get('/total-act-gestion-by-categorie-month-atrd', 'getTotalActGestionByCategoryMonthAtRd')->name('production.act.gestion.group.month.atrd');
+        Route::get('/total-act-gestion-by-category-twelve-month-atrd', 'getTotalActGestionByCategoryTwelveMonthsAtRd')->name('production.act.gestion.group.twelve.month.atrd');
+        
+        Route::get('/act-gestion-group-average-month-atrd', 'getAverageActGestionByCategoryAtRd')->name('act.gestion.group.average.month.atrd');
     });
 
     Route::controller(SinisterDimDetailsController::class)->group(function () {
@@ -174,6 +180,11 @@ Route::group(['middleware' => 'checkRole:Super Admin'], function () {
         Route::get( '/sinister-dim-chart-charge-compte-last-month','SinisterDimChartByChargeCompte')->name('sinister.dim.chart.charge.compte.last.month');
         Route::get( '/sinister-dim-chart-charge-compte-last-twelve-month','SinisterDimChartChargeCompteTwelve')->name('sinister.dim.chart.charge.compte.last.twelve.month');
         Route::get( '/sinister-dim-mean-delai-traitement-by-charge-compte','SinisterDimMeanDelaiTraitementByChargeCompte')->name('sinister.dim.chart.charge.compte.delai.traitement');
+
+        Route::get('/total-act-gestion-by-categorie-month-dim', 'getTotalActGestionByCategoryMonthDim')->name('production.act.gestion.group.month.dim');
+        Route::get('/total-act-gestion-by-category-twelve-month-dim', 'getTotalActGestionByCategoryTwelveMonthsDim')->name('production.act.gestion.group.twelve.month.dim');
+        
+        Route::get('/act-gestion-group-average-month-dim', 'getAverageActGestionByCategoryDim')->name('act.gestion.group.average.month.dim');
 
         
     });

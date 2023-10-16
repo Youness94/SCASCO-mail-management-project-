@@ -1,39 +1,38 @@
-<?php
-
+<?php 
 namespace Database\Factories;
 
-use App\Models\Production;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Faker\Generator as Faker;
-use App\Models\Branche;
+use App\Models\ActeGestionDim;
+use App\Models\BrancheDim;
+use App\Models\ChargeCompteDim;
 use App\Models\Compagnie;
-use App\Models\ActGestion;
-use App\Models\ChargeCompte;
+use App\Models\SinistreDim;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ProductionFactory extends Factory
+class SinistreDimFactory extends Factory
 {
-    protected $model = Production::class;
+    protected $model = SinistreDim::class;
 
     public function definition()
     {
         $faker = $this->faker; // Add this line to initialize the Faker instance
 
-        $brancheId = Branche::inRandomOrder()->first()->id;
+        $brancheId = BrancheDim::inRandomOrder()->first()->id;
         $compagnieId = Compagnie::inRandomOrder()->first()->id;
-        $actGestionId = ActGestion::inRandomOrder()->first()->id;
-        $chargeCompteId = ChargeCompte::inRandomOrder()->first()->id;
+        $actGestionId = ActeGestionDim::inRandomOrder()->first()->id;
+        $chargeCompteId = ChargeCompteDim::inRandomOrder()->first()->id;
         $userId = User::inRandomOrder()->first()->id;
         
 
         return [
             'date_reception' => $faker->date,
-            'nom_police' => $faker->word,
+            'num_declaration' => $faker->word,
             'nom_assure' => $faker->name,
-            'branche_id' => $brancheId,
+            'nom_adherent' => $faker->name,
+            'branche_dim_id' => $brancheId,
             'compagnie_id' => $compagnieId,
-            'act_gestion_id' => $actGestionId,
-            'charge_compte_id' => $chargeCompteId,
+            'acte_gestion_dim_id' => $actGestionId,
+            'charge_compte_dim_id' => $chargeCompteId,
             'date_remise' => $faker->date,
             'date_traitement' => $faker->date,
             'delai_traitement' => $faker->numberBetween(1, 30),
@@ -41,4 +40,6 @@ class ProductionFactory extends Factory
             'user_id' => $userId,
         ];
     }
+
+    
 }

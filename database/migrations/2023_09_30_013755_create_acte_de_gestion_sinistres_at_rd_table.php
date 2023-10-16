@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('acte_de_gestion_sinistres_at_rd', function (Blueprint $table) {
             $table->id();
             $table->string('nom');
-            
+            $table->string('categorie')->nullable();
             $table->foreignId('user_id')->constrained('users');
             $table->timestamps();
         });

@@ -240,4 +240,82 @@ class SinisterAtRdDetailsController extends Controller
         'meanDelaiTraitementLast12Months' => $meanDelaiTraitementLast12Months,
     ]);
 }
+
+public function getTotalActGestionByCategoryMonthAtRd()
+{
+    // Calculate the date range for the current month
+    $currentMonthStart = now()->startOfMonth();
+    $currentMonthEnd = now()->endOfMonth();
+
+    // Join 'act_gestions' table with 'productions' and filter by date range
+    $result = DB::table('acte_de_gestion_sinistres_at_rd')
+        ->leftJoin('sinistres', 'acte_de_gestion_sinistres_at_rd.id', '=', 'sinistres.acte_de_gestion_sinistre_id')
+        ->whereBetween('sinistres.date_remise', [$currentMonthStart, $currentMonthEnd])
+        ->select('acte_de_gestion_sinistres_at_rd.categorie', DB::raw('count(*) as total'))
+        ->groupBy('acte_de_gestion_sinistres_at_rd.categorie')
+        ->get();
+
+    // Transform the result into an associative array
+    $chartData = $result->pluck('total', 'categorie')->toArray();
+
+    return response()->json($chartData);
+}
+
+public function getTotalActGestionByCategoryTwelveMonthsAtRd()
+{
+    // Calculate the date range for the last twelve months
+    $lastTwelveMonthsStart = now()->subMonths(12)->startOfMonth();
+    $currentMonthEnd = now()->endOfMonth();
+
+    // Join 'act_gestions' table with 'productions' and filter by date range
+    $result = DB::table('acte_de_gestion_sinistres_at_rd')
+        ->leftJoin('sinistres', 'acte_de_gestion_sinistres_at_rd.id', '=', 'sinistres.acte_de_gestion_sinistre_id')
+        ->whereBetween('sinistres.date_remise', [$lastTwelveMonthsStart, $currentMonthEnd])
+        ->select('acte_de_gestion_sinistres_at_rd.categorie', DB::raw('count(*) as total'))
+        ->groupBy('acte_de_gestion_sinistres_at_rd.categorie')
+        ->get();
+
+    // Transform the result into an associative array
+    $chartData = $result->pluck('total', 'categorie')->toArray();
+
+    return response()->json($chartData);
+}
+
+public function getAverageActGestionByCategoryAtRd()
+{
+    // Calculate the date range for the current month
+    $currentMonthStart = now()->startOfMonth();
+    $currentMonthEnd = now()->endOfMonth();
+
+    // Calculate the date range for the last 12 months
+    $lastTwelveMonthsStart = now()->subMonths(12)->startOfMonth();
+    $lastTwelveMonthsEnd = now()->endOfMonth();
+
+    // Get the average for the current month
+    $currentMonthAverage = $this->getAverageByCategoryAtRd($currentMonthStart, $currentMonthEnd);
+
+    // Get the average for the last 12 months
+    $lastTwelveMonthsAverage = $this->getAverageByCategoryAtRd($lastTwelveMonthsStart, $lastTwelveMonthsEnd);
+
+    return response()->json([
+        'current_month_average' => $currentMonthAverage,
+        'last_twelve_months_average' => $lastTwelveMonthsAverage,
+    ]);
+}
+
+private function getAverageByCategoryAtRd($startDate, $endDate)
+{
+    // Join 'act_gestions' table with 'productions' and filter by date range
+    $result = DB::table('acte_de_gestion_sinistres_at_rd')
+        ->leftJoin('sinistres', 'acte_de_gestion_sinistres_at_rd.id', '=', 'sinistres.acte_de_gestion_sinistre_id')
+        ->whereBetween('sinistres.date_remise', [$startDate, $endDate])
+        ->select('acte_de_gestion_sinistres_at_rd.categorie', DB::raw('avg(sinistres.acte_de_gestion_sinistre_id) as average'))
+        ->groupBy('acte_de_gestion_sinistres_at_rd.categorie')
+        ->get();
+
+    // Transform the result into an associative array
+    $averageData = $result->pluck('average', 'categorie')->toArray();
+
+    return $averageData;
+}
 }

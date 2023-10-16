@@ -87,9 +87,11 @@
                                 <h5 class="card-title">Nombre de Productions</h5>
                             </div>
                             <div class="col-6">
+                            @if (Session::get('role_name') === 'Super Admin')
                                 <ul class="chart-list-out">
-                                    <li class="star-menus"><a href="javascript:;"><i class="fas fa-ellipsis-v"></i></a></li>
+                                   <a href="{{ route('show.production.details') }}">Plus de détails</a>
                                 </ul>
+                            @endif
                             </div>
                         </div>
                     </div>
@@ -113,9 +115,11 @@
                                 <h5 class="card-title">Nombre de Sinistres Dim</h5>
                             </div>
                             <div class="col-6">
+                            @if (Session::get('role_name') === 'Super Admin')
                                 <ul class="chart-list-out">
-                                    <li class="star-menus"><a href="javascript:;"><i class="fas fa-ellipsis-v"></i></a></li>
+                                 <a href="{{ route('show.sinister.dim.details') }}">Plus de détails</a>
                                 </ul>
+                            @endif
                             </div>
                         </div>
                     </div>
@@ -137,9 +141,11 @@
                                 <h5 class="card-title">Nombre de Sinistres AT&RD</h5>
                             </div>
                             <div class="col-6">
+                            @if (Session::get('role_name') === 'Super Admin')
                                 <ul class="chart-list-out">
-                                    <li class="star-menus"><a href="javascript:;"><i class="fas fa-ellipsis-v"></i></a></li>
+                                <a href="{{ route('show.sinister.at.rd.details') }}">Plus de détails</a>
                                 </ul>
+                            @endif
                             </div>
                         </div>
                     </div>

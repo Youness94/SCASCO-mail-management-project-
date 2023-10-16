@@ -240,4 +240,85 @@ class SinisterDimDetailsController extends Controller
         'meanDelaiTraitementLast12Months' => $meanDelaiTraitementLast12Months,
     ]);
 }
+
+// ====
+
+public function getTotalActGestionByCategoryMonthDim()
+{
+    // Calculate the date range for the current month
+    $currentMonthStart = now()->startOfMonth();
+    $currentMonthEnd = now()->endOfMonth();
+
+    // Join 'act_gestions' table with 'productions' and filter by date range
+    $result = DB::table('acte_gestions_dim')
+        ->leftJoin('sinistres_dim', 'acte_gestions_dim.id', '=', 'sinistres_dim.acte_gestion_dim_id')
+        ->whereBetween('sinistres_dim.date_remise', [$currentMonthStart, $currentMonthEnd])
+        ->select('acte_gestions_dim.categorie', DB::raw('count(*) as total'))
+        ->groupBy('acte_gestions_dim.categorie')
+        ->get();
+
+    // Transform the result into an associative array
+    $chartData = $result->pluck('total', 'categorie')->toArray();
+
+    return response()->json($chartData);
+}
+
+public function getTotalActGestionByCategoryTwelveMonthsDim()
+{
+    // Calculate the date range for the last twelve months
+    $lastTwelveMonthsStart = now()->subMonths(12)->startOfMonth();
+    $currentMonthEnd = now()->endOfMonth();
+
+    // Join 'act_gestions' table with 'productions' and filter by date range
+    $result = DB::table('acte_gestions_dim')
+        ->leftJoin('sinistres_dim', 'acte_gestions_dim.id', '=', 'sinistres_dim.acte_gestion_dim_id')
+        ->whereBetween('sinistres_dim.date_remise', [$lastTwelveMonthsStart, $currentMonthEnd])
+        ->select('acte_gestions_dim.categorie', DB::raw('count(*) as total'))
+        ->groupBy('acte_gestions_dim.categorie')
+        ->get();
+
+    // Transform the result into an associative array
+    $chartData = $result->pluck('total', 'categorie')->toArray();
+
+    return response()->json($chartData);
+}
+
+public function getAverageActGestionByCategoryDim()
+{
+    // Calculate the date range for the current month
+    $currentMonthStart = now()->startOfMonth();
+    $currentMonthEnd = now()->endOfMonth();
+
+    // Calculate the date range for the last 12 months
+    $lastTwelveMonthsStart = now()->subMonths(12)->startOfMonth();
+    $lastTwelveMonthsEnd = now()->endOfMonth();
+
+    // Get the average for the current month
+    $currentMonthAverage = $this->getAverageByCategoryDim($currentMonthStart, $currentMonthEnd);
+
+    // Get the average for the last 12 months
+    $lastTwelveMonthsAverage = $this->getAverageByCategoryDim($lastTwelveMonthsStart, $lastTwelveMonthsEnd);
+
+    return response()->json([
+        'current_month_average' => $currentMonthAverage,
+        'last_twelve_months_average' => $lastTwelveMonthsAverage,
+    ]);
+}
+
+private function getAverageByCategoryDim($startDate, $endDate)
+{
+    // Join 'act_gestions' table with 'productions' and filter by date range
+    $result = DB::table('acte_gestions_dim')
+        ->leftJoin('sinistres_dim', 'acte_gestions_dim.id', '=', 'sinistres_dim.acte_gestion_dim_id')
+        ->whereBetween('sinistres_dim.date_remise', [$startDate, $endDate])
+        ->select('acte_gestions_dim.categorie', DB::raw('avg(sinistres_dim.acte_gestion_dim_id) as average'))
+        ->groupBy('acte_gestions_dim.categorie')
+        ->get();
+
+    // Transform the result into an associative array
+    $averageData = $result->pluck('average', 'categorie')->toArray();
+
+    return $averageData;
+}
+
 }

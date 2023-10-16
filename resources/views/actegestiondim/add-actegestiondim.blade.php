@@ -33,6 +33,22 @@
                                             <input type="text" class="form-control" name="nom">
                                         </div>
                                     </div>
+                                    <div class="col-12 col-sm-4">
+                                    <div class="form-group local-forms">
+                                        <label>Categorie <span class="login-danger">*</span></label>
+                                        <select class="form-control select @error('categorie') is-invalid @enderror" name="categorie" id="categorie">
+                                            <option selected disabled>Categorie Name</option>
+                                            @foreach ($categories as $categorie)
+                                            <option value="{{ $categorie->categorie_name }}">{{ $categorie->categorie_name }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('categorie')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                        @enderror
+                                    </div>
+                                </div>
                                     
                                     <div class="col-12">
                                         <div class="student-submit">

@@ -1240,16 +1240,22 @@ $(document).ready(function () {
                 success: function (response) {
                     // console.log("Response:", response);
 
-                    var categoriesWithNames = response.chargeCompteIds.map(function (id) {
-                        return response.chargeCompteNames[id] || "Unknown";
-                    });
-                
+                    var categoriesWithNames = response.chargeCompteIds.map(
+                        function (id) {
+                            return response.chargeCompteNames[id] || "Unknown";
+                        }
+                    );
+
                     // console.log("Current Month Data:", response.meanDelaiTraitementCurrentMonth);
                     // console.log("Last 12 Months Data:", response.meanDelaiTraitementLast12Months);
-                
+
                     // Convert string values to numbers
-                    var currentMonthData = Object.values(response.meanDelaiTraitementCurrentMonth).map(parseFloat);
-                    var last12MonthsData = Object.values(response.meanDelaiTraitementLast12Months).map(parseFloat);
+                    var currentMonthData = Object.values(
+                        response.meanDelaiTraitementCurrentMonth
+                    ).map(parseFloat);
+                    var last12MonthsData = Object.values(
+                        response.meanDelaiTraitementLast12Months
+                    ).map(parseFloat);
                     var optionsBar = {
                         chart: {
                             type: "bar",
@@ -1315,8 +1321,6 @@ $(document).ready(function () {
     });
 
     // ==============================
-
-
 
     // Sinister AT & RD details ============== //
 
@@ -1617,7 +1621,9 @@ $(document).ready(function () {
 
                     // Use the global variable instead of redeclaring it
                     chartBar = new ApexCharts(
-                        document.querySelector("#sinisterAtRdDateTraitementNull"),
+                        document.querySelector(
+                            "#sinisterAtRdDateTraitementNull"
+                        ),
                         optionsBar
                     );
                     chartBar.render();
@@ -1926,16 +1932,22 @@ $(document).ready(function () {
                 success: function (response) {
                     // console.log("Response:", response);
 
-                    var categoriesWithNames = response.chargeCompteIds.map(function (id) {
-                        return response.chargeCompteNames[id] || "Unknown";
-                    });
-                
+                    var categoriesWithNames = response.chargeCompteIds.map(
+                        function (id) {
+                            return response.chargeCompteNames[id] || "Unknown";
+                        }
+                    );
+
                     // console.log("Current Month Data:", response.meanDelaiTraitementCurrentMonth);
                     // console.log("Last 12 Months Data:", response.meanDelaiTraitementLast12Months);
-                
+
                     // Convert string values to numbers
-                    var currentMonthData = Object.values(response.meanDelaiTraitementCurrentMonth).map(parseFloat);
-                    var last12MonthsData = Object.values(response.meanDelaiTraitementLast12Months).map(parseFloat);
+                    var currentMonthData = Object.values(
+                        response.meanDelaiTraitementCurrentMonth
+                    ).map(parseFloat);
+                    var last12MonthsData = Object.values(
+                        response.meanDelaiTraitementLast12Months
+                    ).map(parseFloat);
                     var optionsBar = {
                         chart: {
                             type: "bar",
@@ -2001,10 +2013,6 @@ $(document).ready(function () {
     });
 
     // ==============================
-
-
-
-
 
     // Sinister DIM details ============== //
 
@@ -2228,7 +2236,7 @@ $(document).ready(function () {
                 method: "GET",
                 dataType: "json",
                 success: function (response) {
-                    // console.log(response);
+                    console.log(response);
 
                     var optionsBar = {
                         chart: {
@@ -2305,7 +2313,9 @@ $(document).ready(function () {
 
                     // Use the global variable instead of redeclaring it
                     chartBar = new ApexCharts(
-                        document.querySelector("#sinisterDimDateTraitementNull"),
+                        document.querySelector(
+                            "#sinisterDimDateTraitementNull"
+                        ),
                         optionsBar
                     );
                     chartBar.render();
@@ -2688,259 +2698,793 @@ $(document).ready(function () {
         setInterval(fetchAndRefreshChart, 30000);
     });
 
-    // ==============================
 
-// ======== 3-	Données par Actes regroupés ======== //
-
-$(document).ready(function () {
-    // Variable to store the chart instance
-    var chartBar;
-
-    function fetchAndRefreshChart() {
-        $.ajax({
-            url: "/production-act-gestion-group-month",
-            method: "GET",
-            dataType: "json",
-            success: function (response) {
-                // console.log("Response:", response);
-
-                // Check if response is an object
-                if (typeof response === 'object' && response !== null) {
-                    // Extract categories and their corresponding data
-                    var categories = Object.keys(response);
-                    var totalDelaiTraitement = Object.values(response);
-
-                    var optionsBar = {
-                        chart: {
-                            type: "bar",
-                            height: 350,
-                            toolbar: { show: false },
-                        },
-                        plotOptions: {
-                            bar: { horizontal: false, columnWidth: "55%" },
-                        },
-                        series: [{
-                            name: "Total du mois",
-                            data: totalDelaiTraitement,
-                        }],
-                        xaxis: {
-                            categories: categories,
-                            labels: {
-                                style: {
-                                    fontSize: "12px",
+    // ======== 3-	Données par Actes regroupés ======== // production
+    $(document).ready(function () {
+        // Variable to store the chart instance
+        var chartBar;
+    
+        function fetchAndRefreshChart() {
+            // Ajax request to fetch data from the server
+            $.ajax({
+                url: "/total-act-gestion-by-categorie-month", // Replace with your actual API endpoint
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    // Check if response is an object
+                    if (typeof response === "object" && response !== null) {
+                        // Extract categories and their counts
+                        var categoriesWithCounts = Object.keys(response).map(
+                            function (category) {
+                                return {
+                                    name: category || "Unknown",
+                                    data: [response[category]],
+                                };
+                            }
+                        );
+    
+                        // Configuration for the bar chart
+                        var optionsBar = {
+                            chart: {
+                                type: "bar",
+                                height: 350,
+                                toolbar: { show: false },
+                            },
+                            plotOptions: {
+                                bar: { horizontal: false, columnWidth: "40%" },
+                            },
+                            series: categoriesWithCounts,
+                            xaxis: {
+                                categories: categoriesWithCounts.map(function (
+                                    item
+                                ) {
+                                    return item.name;
+                                }),
+                                labels: {
+                                    style: {
+                                        fontSize: "12px",
+                                    },
                                 },
                             },
-                        },
-                        legend: {
-                            fontSize: "12px",
-                        },
-                        yaxis: {
-                            title: {
-                                text: "Total du mois",
+                            legend: {
+                                fontSize: "12px",
                             },
-                        },
-                    };
-
-                    // Destroy the existing chart before rendering a new one
-                    if (chartBar) {
-                        chartBar.destroy();
+                            yaxis: {
+                                title: {
+                                    text: "Total Par Acts Gestion",
+                                },
+                            },
+                        };
+    
+                        // Destroy the existing chart before rendering a new one
+                        if (chartBar) {
+                            chartBar.destroy();
+                        }
+    
+                        // Create a new chart instance
+                        chartBar = new ApexCharts(
+                            document.querySelector("#acteGestionMois"),
+                            optionsBar
+                        );
+    
+                        // Render the chart
+                        chartBar.render();
+                    } else {
+                        console.error(
+                            "Invalid response format. Expected an object."
+                        );
                     }
-
-                    // Use the global variable instead of redeclaring it
-                    chartBar = new ApexCharts(
-                        document.querySelector("#acteGestionMois"),
-                        optionsBar
-                    );
-                    chartBar.render();
-                } else {
-                    console.error("Invalid response format. Expected an object.");
-                }
-            },
-            error: function (error) {
-                console.error("Error fetching data:", error);
-            
-                // Log the status and response text
-                console.log("Status:", error.status);
-                console.log("Response Text:", error.responseText);
-            },
-        });
-    }
-
-    fetchAndRefreshChart();
-
-    // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
-    setInterval(fetchAndRefreshChart, 30000);
-});
+                },
+                error: function (error) {
+                    console.error("Error fetching data:", error);
+                    console.log("Status:", error.status);
+                    console.log("Response Text:", error.responseText);
+                },
+            });
+        }
+    
+        // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
+        setInterval(fetchAndRefreshChart, 30000);
+    
+        // Initial fetch and render
+        fetchAndRefreshChart();
+    });
 
 
-$(document).ready(function () {
-    // Variable to store the chart instance
-    var chartBar;
+    $(document).ready(function () {
+        // Variable to store the chart instance
+        var chartBar;
 
-    function fetchAndRefreshChart() {
-        $.ajax({
-            url: "/production-act-gestion-group-twelve-month",
-            method: "GET",
-            dataType: "json",
-            success: function (response) {
-                // console.log("Response:", response);
-
-                // Check if response is an object
-                if (typeof response === 'object' && response !== null) {
+        function fetchAndRefreshChart() {
+            $.ajax({
+                url: "/total-act-gestion-by-category-twelve-month", // Replace with your actual Laravel route
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    // console.log("Response:", response);
+                  // Check if response is an object
+                  if (typeof response === "object" && response !== null) {
                     // Extract categories and their counts
                     var categoriesWithCounts = Object.keys(response).map(function (category) {
-                        return {
-                            name: category || "Unknown",
-                            data: [response[category]],
-                        };
+                      return {
+                        name: category || "Unknown",
+                        data: [response[category]],
+                      };
                     });
-
+          
                     var optionsBar = {
-                        chart: {
-                            type: "bar",
-                            height: 350,
-                            toolbar: { show: false },
-                        },
-                        plotOptions: {
-                            bar: { horizontal: false, columnWidth: "40%" },
-                        },
-                        series: categoriesWithCounts,
-                        xaxis: {
-                            categories: categoriesWithCounts.map(function (item) {
-                                return item.name;
-                            }),
-                            labels: {
-                                style: {
-                                    fontSize: "12px",
-                                },
-                            },
-                        },
-                        legend: {
+                      chart: {
+                        type: "bar",
+                        height: 350,
+                        toolbar: { show: false },
+                      },
+                      plotOptions: {
+                        bar: { horizontal: false, columnWidth: "40%" },
+                      },
+                      series: categoriesWithCounts,
+                      xaxis: {
+                        categories: categoriesWithCounts.map(function (item) {
+                          return item.name;
+                        }),
+                        labels: {
+                          style: {
                             fontSize: "12px",
+                          },
                         },
-                        yaxis: {
-                            title: {
-                                text: "Count",
-                            },
+                      },
+                      legend: {
+                        fontSize: "12px",
+                      },
+                      yaxis: {
+                        title: {
+                          text: "Comte",
                         },
+                      },
                     };
-
+          
                     // Destroy the existing chart before rendering a new one
                     if (chartBar) {
-                        chartBar.destroy();
+                      chartBar.destroy();
                     }
-
-                    // Use the global variable instead of redeclaring it
-                    chartBar = new ApexCharts(
-                        document.querySelector("#acteGestionTwelveMois"),
-                        optionsBar
-                    );
+          
+                    // Create a new chart instance
+                    chartBar = new ApexCharts(document.querySelector("#acteGestionTwelveMois"), optionsBar);
+          
+                    // Render the chart
                     chartBar.render();
-                } else {
+                  } else {
                     console.error("Invalid response format. Expected an object.");
-                }
-            },
-            error: function (error) {
-                console.error("Error fetching data:", error);
+                  }
+                },
+                error: function (error) {
+                  console.error("Error fetching data:", error);
+          
+                  // Log the status and response text
+                  console.log("Status:", error.status);
+                  console.log("Response Text:", error.responseText);
+                },
+              });
+            }
 
-                // Log the status and response text
-                console.log("Status:", error.status);
-                console.log("Response Text:", error.responseText);
-            },
-        });
-    }
+        fetchAndRefreshChart();
 
-    fetchAndRefreshChart();
+        // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
+        setInterval(fetchAndRefreshChart, 30000);
+    });
 
-    // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
-    setInterval(fetchAndRefreshChart, 30000);
-});
-
-
-
-$(document).ready(function () {
-    // Variable to store the chart instance
-    var chartBar;
-
-    function fetchAndRefreshChart() {
-        $.ajax({
-            url: "/production-act-gestion-group-average-month", // Updated endpoint
-            method: "GET",
-            dataType: "json",
-            success: function (response) {
-                // Check if response is an object
-                if (typeof response === 'object' && response !== null) {
-                    // Extract categories and their averages
-                    var categoriesWithData = Object.keys(response).map(function (category) {
-                        return {
-                            name: category || "Unknown",
-                            data: [response[category]['average']],
-                        };
-                    });
-
-                    var optionsBar = {
-                        chart: {
-                            type: "bar",
-                            height: 350,
-                            toolbar: { show: false },
-                        },
-                        plotOptions: {
-                            bar: { horizontal: false, columnWidth: "40%" },
-                        },
-                        series: categoriesWithData,
-                        xaxis: {
-                            categories: categoriesWithData.map(function (item) {
-                                return item.name;
-                            }),
-                            labels: {
-                                style: {
-                                    fontSize: "12px",
+    $(document).ready(function () {
+        // Variable to store the chart instance
+        var chartBar;
+    
+        function fetchAndRefreshChart() {
+            $.ajax({
+                url: "/production-act-gestion-group-average-month", // Replace with your actual Laravel route
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    // Check if response is an object
+                    if (typeof response === "object" && response !== null) {
+                        // Extract categories and their corresponding data
+                        var categories = Object.keys(response.current_month_average);
+                        var currentMonthAverage = Object.values(response.current_month_average);
+                        var lastTwelveMonthsAverage = Object.values(response.last_twelve_months_average);
+    
+                        // Configuration for the bar chart
+                        var optionsBar = {
+                            chart: {
+                                type: "bar",
+                                height: 350,
+                                toolbar: { show: false },
+                            },
+                            plotOptions: {
+                                bar: { horizontal: false, columnWidth: "40%" },
+                            },
+                            series: [
+                                {
+                                    name: "La moyenne de mois",
+                                    data: currentMonthAverage,
+                                },
+                                {
+                                    name: "La moyenne cumulée",
+                                    data: lastTwelveMonthsAverage,
+                                },
+                            ],
+                            xaxis: {
+                                categories: categories,
+                                labels: {
+                                    style: {
+                                        fontSize: "12px",
+                                    },
                                 },
                             },
-                        },
-                        legend: {
-                            fontSize: "12px",
-                        },
-                        yaxis: {
-                            title: {
-                                text: "Délai Moyen De Traitement",
+                            legend: {
+                                fontSize: "12px",
                             },
-                        },
-                    };
+                            yaxis: {
+                                title: {
+                                    text: "Moyenne par actes de gestion",
+                                },
+                            },
+                        };
+    
+                        // Destroy the existing chart before rendering a new one
+                        if (chartBar) {
+                            chartBar.destroy();
+                        }
+    
+                        // Create a new chart instance
+                        chartBar = new ApexCharts(
+                            document.querySelector("#acteGestionAverageCurrentMois"),
+                            optionsBar
+                        );
+    
+                        // Render the chart
+                        chartBar.render();
+                    } else {
+                        console.error("Invalid response format. Expected an object.");
+                    }
+                },
+                error: function (error) {
+                    console.error("Error fetching data:", error);
+    
+                    // Log the status and response text
+                    console.log("Status:", error.status);
+                    console.log("Response Text:", error.responseText);
+                },
+            });
+        }
+    
+        fetchAndRefreshChart();
+    
+        // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
+        setInterval(fetchAndRefreshChart, 30000);
+    });
 
+
+    // ======== 3-	Données par Actes regroupés ======== // sinister dim
+    
+    $(document).ready(function () {
+        // Variable to store the chart instance
+        var chartBar;
+    
+        function fetchAndRefreshChart() {
+            // Ajax request to fetch data from the server
+            $.ajax({
+                url: "/total-act-gestion-by-categorie-month-dim", // Replace with your actual API endpoint
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    console.log(response)
+                    // Check if response is an object
+                    if (typeof response === "object" && response !== null) {
+                        // Extract categories and their counts
+                        var categoriesWithCounts = Object.keys(response).map(
+                            function (category) {
+                                return {
+                                    name: category || "Unknown",
+                                    data: [response[category]],
+                                };
+                            }
+                        );
+    
+                        // Configuration for the bar chart
+                        var optionsBar = {
+                            chart: {
+                                type: "bar",
+                                height: 350,
+                                toolbar: { show: false },
+                            },
+                            plotOptions: {
+                                bar: { horizontal: false, columnWidth: "40%" },
+                            },
+                            series: categoriesWithCounts,
+                            xaxis: {
+                                categories: categoriesWithCounts.map(function (
+                                    item
+                                ) {
+                                    return item.name;
+                                }),
+                                labels: {
+                                    style: {
+                                        fontSize: "12px",
+                                    },
+                                },
+                            },
+                            legend: {
+                                fontSize: "12px",
+                            },
+                            yaxis: {
+                                title: {
+                                    text: "Total Par Acts Gestion",
+                                },
+                            },
+                        };
+    
+                        // Destroy the existing chart before rendering a new one
+                        if (chartBar) {
+                            chartBar.destroy();
+                        }
+    
+                        // Create a new chart instance
+                        chartBar = new ApexCharts(
+                            document.querySelector("#acteGestionMoisDim"),
+                            optionsBar
+                        );
+    
+                        // Render the chart
+                        chartBar.render();
+                    } else {
+                        console.error(
+                            "Invalid response format. Expected an object."
+                        );
+                    }
+                },
+                error: function (error) {
+                    console.error("Error fetching data:", error);
+                    console.log("Status:", error.status);
+                    console.log("Response Text:", error.responseText);
+                },
+            });
+        }
+    
+        // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
+        setInterval(fetchAndRefreshChart, 30000);
+    
+        // Initial fetch and render
+        fetchAndRefreshChart();
+    });
+
+    $(document).ready(function () {
+        // Variable to store the chart instance
+        var chartBar;
+
+        function fetchAndRefreshChart() {
+            $.ajax({
+                url: "/total-act-gestion-by-category-twelve-month-dim", // Replace with your actual Laravel route
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    // console.log("Response:", response);
+                  // Check if response is an object
+                  if (typeof response === "object" && response !== null) {
+                    // Extract categories and their counts
+                    var categoriesWithCounts = Object.keys(response).map(function (category) {
+                      return {
+                        name: category || "Unknown",
+                        data: [response[category]],
+                      };
+                    });
+          
+                    var optionsBar = {
+                      chart: {
+                        type: "bar",
+                        height: 350,
+                        toolbar: { show: false },
+                      },
+                      plotOptions: {
+                        bar: { horizontal: false, columnWidth: "40%" },
+                      },
+                      series: categoriesWithCounts,
+                      xaxis: {
+                        categories: categoriesWithCounts.map(function (item) {
+                          return item.name;
+                        }),
+                        labels: {
+                          style: {
+                            fontSize: "12px",
+                          },
+                        },
+                      },
+                      legend: {
+                        fontSize: "12px",
+                      },
+                      yaxis: {
+                        title: {
+                          text: "Comte",
+                        },
+                      },
+                    };
+          
                     // Destroy the existing chart before rendering a new one
                     if (chartBar) {
-                        chartBar.destroy();
+                      chartBar.destroy();
                     }
-
-                    // Use the global variable instead of redeclaring it
-                    chartBar = new ApexCharts(
-                        document.querySelector("#acteGestionAverageCurrentMois"),
-                        optionsBar
-                    );
+          
+                    // Create a new chart instance
+                    chartBar = new ApexCharts(document.querySelector("#acteGestionTwelveMoisDim"), optionsBar);
+          
+                    // Render the chart
                     chartBar.render();
-                } else {
+                  } else {
                     console.error("Invalid response format. Expected an object.");
-                }
-            },
-            error: function (error) {
-                console.error("Error fetching data:", error);
+                  }
+                },
+                error: function (error) {
+                  console.error("Error fetching data:", error);
+          
+                  // Log the status and response text
+                  console.log("Status:", error.status);
+                  console.log("Response Text:", error.responseText);
+                },
+              });
+            }
 
-                // Log the status and response text
-                console.log("Status:", error.status);
-                console.log("Response Text:", error.responseText);
-            },
-        });
-    }
+        fetchAndRefreshChart();
 
-    fetchAndRefreshChart();
+        // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
+        setInterval(fetchAndRefreshChart, 30000);
+    });
 
-    // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
-    setInterval(fetchAndRefreshChart, 30000);
-});
+    $(document).ready(function () {
+        // Variable to store the chart instance
+        var chartBar;
+    
+        function fetchAndRefreshChart() {
+            $.ajax({
+                url: "/act-gestion-group-average-month-dim", // Replace with your actual Laravel route
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    // Check if response is an object
+                    if (typeof response === "object" && response !== null) {
+                        // Extract categories and their corresponding data
+                        var categories = Object.keys(response.current_month_average);
+                        var currentMonthAverage = Object.values(response.current_month_average);
+                        var lastTwelveMonthsAverage = Object.values(response.last_twelve_months_average);
+    
+                        // Configuration for the bar chart
+                        var optionsBar = {
+                            chart: {
+                                type: "bar",
+                                height: 350,
+                                toolbar: { show: false },
+                            },
+                            plotOptions: {
+                                bar: { horizontal: false, columnWidth: "40%" },
+                            },
+                            series: [
+                                {
+                                    name: "La moyenne de mois",
+                                    data: currentMonthAverage,
+                                },
+                                {
+                                    name: "La moyenne cumulée",
+                                    data: lastTwelveMonthsAverage,
+                                },
+                            ],
+                            xaxis: {
+                                categories: categories,
+                                labels: {
+                                    style: {
+                                        fontSize: "12px",
+                                    },
+                                },
+                            },
+                            legend: {
+                                fontSize: "12px",
+                            },
+                            yaxis: {
+                                title: {
+                                    text: "Moyenne par actes de gestion",
+                                },
+                            },
+                        };
+    
+                        // Destroy the existing chart before rendering a new one
+                        if (chartBar) {
+                            chartBar.destroy();
+                        }
+    
+                        // Create a new chart instance
+                        chartBar = new ApexCharts(
+                            document.querySelector("#acteGestionAverageCurrentMoisDim"),
+                            optionsBar
+                        );
+    
+                        // Render the chart
+                        chartBar.render();
+                    } else {
+                        console.error("Invalid response format. Expected an object.");
+                    }
+                },
+                error: function (error) {
+                    console.error("Error fetching data:", error);
+    
+                    // Log the status and response text
+                    console.log("Status:", error.status);
+                    console.log("Response Text:", error.responseText);
+                },
+            });
+        }
+    
+        fetchAndRefreshChart();
+    
+        // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
+        setInterval(fetchAndRefreshChart, 30000);
+    });
 
+    // ======== 4-	Données par Actes regroupés ======== // sinister at rd
+    
+    $(document).ready(function () {
+        // Variable to store the chart instance
+        var chartBar;
+    
+        function fetchAndRefreshChart() {
+            // Ajax request to fetch data from the server
+            $.ajax({
+                url: "/total-act-gestion-by-categorie-month-atrd", // Replace with your actual API endpoint
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    console.log(response)
+                    // Check if response is an object
+                    if (typeof response === "object" && response !== null) {
+                        // Extract categories and their counts
+                        var categoriesWithCounts = Object.keys(response).map(
+                            function (category) {
+                                return {
+                                    name: category || "Unknown",
+                                    data: [response[category]],
+                                };
+                            }
+                        );
+    
+                        // Configuration for the bar chart
+                        var optionsBar = {
+                            chart: {
+                                type: "bar",
+                                height: 350,
+                                toolbar: { show: false },
+                            },
+                            plotOptions: {
+                                bar: { horizontal: false, columnWidth: "40%" },
+                            },
+                            series: categoriesWithCounts,
+                            xaxis: {
+                                categories: categoriesWithCounts.map(function (
+                                    item
+                                ) {
+                                    return item.name;
+                                }),
+                                labels: {
+                                    style: {
+                                        fontSize: "12px",
+                                    },
+                                },
+                            },
+                            legend: {
+                                fontSize: "12px",
+                            },
+                            yaxis: {
+                                title: {
+                                    text: "Total Par Acts Gestion",
+                                },
+                            },
+                        };
+    
+                        // Destroy the existing chart before rendering a new one
+                        if (chartBar) {
+                            chartBar.destroy();
+                        }
+    
+                        // Create a new chart instance
+                        chartBar = new ApexCharts(
+                            document.querySelector("#acteGestionMoisAtRd"),
+                            optionsBar
+                        );
+    
+                        // Render the chart
+                        chartBar.render();
+                    } else {
+                        console.error(
+                            "Invalid response format. Expected an object."
+                        );
+                    }
+                },
+                error: function (error) {
+                    console.error("Error fetching data:", error);
+                    console.log("Status:", error.status);
+                    console.log("Response Text:", error.responseText);
+                },
+            });
+        }
+    
+        // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
+        setInterval(fetchAndRefreshChart, 30000);
+    
+        // Initial fetch and render
+        fetchAndRefreshChart();
+    });
 
+    $(document).ready(function () {
+        // Variable to store the chart instance
+        var chartBar;
 
+        function fetchAndRefreshChart() {
+            $.ajax({
+                url: "/total-act-gestion-by-category-twelve-month-atrd", // Replace with your actual Laravel route
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    // console.log("Response:", response);
+                  // Check if response is an object
+                  if (typeof response === "object" && response !== null) {
+                    // Extract categories and their counts
+                    var categoriesWithCounts = Object.keys(response).map(function (category) {
+                      return {
+                        name: category || "Unknown",
+                        data: [response[category]],
+                      };
+                    });
+          
+                    var optionsBar = {
+                      chart: {
+                        type: "bar",
+                        height: 350,
+                        toolbar: { show: false },
+                      },
+                      plotOptions: {
+                        bar: { horizontal: false, columnWidth: "40%" },
+                      },
+                      series: categoriesWithCounts,
+                      xaxis: {
+                        categories: categoriesWithCounts.map(function (item) {
+                          return item.name;
+                        }),
+                        labels: {
+                          style: {
+                            fontSize: "12px",
+                          },
+                        },
+                      },
+                      legend: {
+                        fontSize: "12px",
+                      },
+                      yaxis: {
+                        title: {
+                          text: "Comte",
+                        },
+                      },
+                    };
+          
+                    // Destroy the existing chart before rendering a new one
+                    if (chartBar) {
+                      chartBar.destroy();
+                    }
+          
+                    // Create a new chart instance
+                    chartBar = new ApexCharts(document.querySelector("#acteGestionTwelveMoisAtRd"), optionsBar);
+          
+                    // Render the chart
+                    chartBar.render();
+                  } else {
+                    console.error("Invalid response format. Expected an object.");
+                  }
+                },
+                error: function (error) {
+                  console.error("Error fetching data:", error);
+          
+                  // Log the status and response text
+                  console.log("Status:", error.status);
+                  console.log("Response Text:", error.responseText);
+                },
+              });
+            }
+
+        fetchAndRefreshChart();
+
+        // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
+        setInterval(fetchAndRefreshChart, 30000);
+    });
+
+    $(document).ready(function () {
+        // Variable to store the chart instance
+        var chartBar;
+    
+        function fetchAndRefreshChart() {
+            $.ajax({
+                url: "/act-gestion-group-average-month-atrd", // Replace with your actual Laravel route
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    // Check if response is an object
+                    console.log(response)
+                    if (typeof response === "object" && response !== null) {
+                        // Extract categories and their corresponding data
+                        var categories = Object.keys(response.current_month_average);
+                        var currentMonthAverage = Object.values(response.current_month_average);
+                        var lastTwelveMonthsAverage = Object.values(response.last_twelve_months_average);
+    
+                        // Configuration for the bar chart
+                        var optionsBar = {
+                            chart: {
+                                type: "bar",
+                                height: 350,
+                                toolbar: { show: false },
+                            },
+                            plotOptions: {
+                                bar: { horizontal: false, columnWidth: "40%" },
+                            },
+                            series: [
+                                {
+                                    name: "La moyenne de mois",
+                                    data: currentMonthAverage,
+                                },
+                                {
+                                    name: "La moyenne cumulée",
+                                    data: lastTwelveMonthsAverage,
+                                },
+                            ],
+                            xaxis: {
+                                categories: categories,
+                                labels: {
+                                    style: {
+                                        fontSize: "12px",
+                                    },
+                                },
+                            },
+                            legend: {
+                                fontSize: "12px",
+                            },
+                            yaxis: {
+                                title: {
+                                    text: "Moyenne par actes de gestion",
+                                },
+                            },
+                        };
+    
+                        // Destroy the existing chart before rendering a new one
+                        if (chartBar) {
+                            chartBar.destroy();
+                        }
+    
+                        // Create a new chart instance
+                        chartBar = new ApexCharts(
+                            document.querySelector("#acteGestionAverageCurrentMoisAtRd"),
+                            optionsBar
+                        );
+    
+                        // Render the chart
+                        chartBar.render();
+                    } else {
+                        console.error("Invalid response format. Expected an object.");
+                    }
+                },
+                error: function (error) {
+                    console.error("Error fetching data:", error);
+    
+                    // Log the status and response text
+                    console.log("Status:", error.status);
+                    console.log("Response Text:", error.responseText);
+                },
+            });
+        }
+    
+        fetchAndRefreshChart();
+    
+        // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
+        setInterval(fetchAndRefreshChart, 30000);
+    });
 
     // if ($("#s-line").length > 0) {
     //     var sline = {
@@ -3214,5 +3758,3 @@ $(document).ready(function () {
 //     );
 //     chart.render();
 // }
-
-
