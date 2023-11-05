@@ -29,7 +29,7 @@ class ProductionController extends Controller
         $productions = Production::with('branches', 'compagnies', 'act_gestions', 'charge_comptes')->orderBy('created_at', 'desc')->get();
         return view('production.list-production', compact('productions'));
     }
-   
+
 
 
     public function FilterProduction(Request $request)
@@ -37,7 +37,7 @@ class ProductionController extends Controller
     {
         $date_debut = $request->input('date_debut');
         $date_fin = $request->input('date_fin');
-        
+
 
         // Start with a query builder
         $query = Production::query();
@@ -45,13 +45,11 @@ class ProductionController extends Controller
         // Check if date_debut is not empty
         if (!empty($date_debut)) {
             $query->whereDate('date_reception', '>=', $date_debut);
-                  
         }
 
         // Check if date_fin is not empty
         if (!empty($date_fin)) {
             $query->whereDate('date_reception', '<=', $date_fin);
-                  
         }
 
         // Fetch the filtered productions
@@ -59,15 +57,15 @@ class ProductionController extends Controller
 
         // Determine if data exists
         $dataExists = !$productions->isEmpty();
-        
-        return view('production.list-production', compact('productions','date_debut', 'date_fin', 'dataExists'));
+
+        return view('production.list-production', compact('productions', 'date_debut', 'date_fin', 'dataExists'));
     }
 
-  
-    public function ExportProductions(Request $request)
-{
 
-    $date_debut = $request->date_debut;
+    public function ExportProductions(Request $request)
+    {
+
+        $date_debut = $request->date_debut;
         $date_fin = $request->date_fin;
 
         // Vérifie s'il y a des données à la date spécifiée
@@ -84,19 +82,19 @@ class ProductionController extends Controller
             // Par exemple, vous pouvez rediriger l'utilisateur vers la page précédente :
             return redirect()->back()->with('error', 'Aucune donnée disponible pour la période spécifiée.');
         }
-}
+    }
 
 
 
-public function ResetProductionFilter()
-{
-    // Fetch all productions without any filtering
-    $productions = Production::all();
+    public function ResetProductionFilter()
+    {
+        // Fetch all productions without any filtering
+        $productions = Production::all();
 
-    // Return the view with the unfiltered productions
-    return view('production.list-production', compact('productions'));
-}
-// =============
+        // Return the view with the unfiltered productions
+        return view('production.list-production', compact('productions'));
+    }
+    // =============
 
 
     public function AddProduction()
@@ -110,30 +108,9 @@ public function ResetProductionFilter()
 
         return view('production.add-production', compact('branches', 'compagnies', 'act_gestions', 'charge_comptes'));
     }
-    public function AdminAddProduction()
-    {
-        // Retrieve lists of related models for dropdowns
-        $branches = Branche::all();
-        $compagnies = Compagnie::all();
-        $act_gestions = ActGestion::all();
-        $charge_comptes = ChargeCompte::all();
-        $productions = Production::latest()->get();
 
-        return view('production.admin-add-production', compact('branches', 'compagnies', 'act_gestions', 'charge_comptes'));
-    }
-    public function ShowProduction($id)
-    {
-        // Find the production record by ID along with its related data
-        $production = Production::with(['branches', 'compagnies', 'act_gestions', 'charge_comptes'])
-            ->findOrFail($id);
 
-        // Return the production details view with the related data
-        return view('production.show-production', compact('production'));
-    }
-// =============
-    
 
-   
 
     public function StoreProduction(Request $request)
     {
@@ -187,13 +164,17 @@ public function ResetProductionFilter()
         $production->save();
 
         // Redirect to the index page or another appropriate page
-        return redirect('/tous/productions')->with('success', 'Production record created successfully');
+        return redirect('/ajouter/production')->with('success', 'Production record created successfully');
     }
-// ============
+    // ============
 
 
     private function calculateDelaiTraitement($dateRemise, $dateTraitement)
     {
+        if ($dateTraitement === null) {
+            return null; // Return null for "en cours"
+        }
+
         $start = Carbon::parse($dateRemise);
         $end = Carbon::parse($dateTraitement);
 
@@ -222,53 +203,53 @@ public function ResetProductionFilter()
         return view('production.edit-production', compact('production', 'branches', 'compagnies', 'act_gestions', 'charge_comptes'));
     }
     // =======
-   
-    
-    public function UpdateProduction(Request $request,Production $productions, $id)
-{
-    // Find the production record by ID
-    $production = Production::findOrFail($id);
-
-    $validatedData = $request->validate([
-        'branche_id' => 'required|exists:branches,id',
-        'compagnie_id' => 'required|exists:compagnies,id',
-        'act_gestion_id' => 'required|exists:act_gestions,id',
-        'charge_compte_id' => 'required|exists:charge_comptes,id',
-        'nom_assure' => 'required|string',
-        'nom_police' => 'required|string',
-        'date_reception' => 'required|date',
-        'date_remise' => 'required|date',
-        'date_traitement' => 'nullable|date',
-        'observation' => 'nullable|string',
-    ]);
 
 
-    // Calculate the delai_traitement while excluding weekends
-    $delaiTraitement = $this->calculateDelaiTraitement(
-        $validatedData['date_remise'],
-        $validatedData['date_traitement']
-    );
+    public function UpdateProduction(Request $request, Production $productions, $id)
+    {
+        // Find the production record by ID
+        $production = Production::findOrFail($id);
 
-    // Update the production record 
-    $production->update([
-        'branche_id' => $validatedData['branche_id'],
-        'compagnie_id' => $validatedData['compagnie_id'],
-        'act_gestion_id' => $validatedData['act_gestion_id'],
-        'charge_compte_id' => $validatedData['charge_compte_id'],
-        'nom_assure' => $validatedData['nom_assure'],
-        'nom_police' => $validatedData['nom_police'],
-        'date_reception' => $validatedData['date_reception'],
-        'date_remise' => $validatedData['date_remise'],
-        'date_traitement' =>  isset($validatedData['date_traitement']) ? $validatedData['date_traitement'] : null, 
-        // 'observation' => $validatedData['observation'],
-        'observation' => isset($validatedData['observation']) ? $validatedData['observation'] : null,
-        'delai_traitement' => $delaiTraitement, // Update delai_traitement
-    ]);
+        $validatedData = $request->validate([
+            'branche_id' => 'required|exists:branches,id',
+            'compagnie_id' => 'required|exists:compagnies,id',
+            'act_gestion_id' => 'required|exists:act_gestions,id',
+            'charge_compte_id' => 'required|exists:charge_comptes,id',
+            'nom_assure' => 'required|string',
+            'nom_police' => 'required|string',
+            'date_reception' => 'required|date',
+            'date_remise' => 'required|date',
+            'date_traitement' => 'nullable|date',
+            'observation' => 'nullable|string',
+        ]);
 
-    $production->user_id = auth()->user()->id;
-    return redirect('/tous/productions')->with('success', 'Production updated successfully');
-}
-// =============
+
+        // Calculate the delai_traitement while excluding weekends
+        $delaiTraitement = $this->calculateDelaiTraitement(
+            $validatedData['date_remise'],
+            $validatedData['date_traitement']
+        );
+
+        // Update the production record 
+        $production->update([
+            'branche_id' => $validatedData['branche_id'],
+            'compagnie_id' => $validatedData['compagnie_id'],
+            'act_gestion_id' => $validatedData['act_gestion_id'],
+            'charge_compte_id' => $validatedData['charge_compte_id'],
+            'nom_assure' => $validatedData['nom_assure'],
+            'nom_police' => $validatedData['nom_police'],
+            'date_reception' => $validatedData['date_reception'],
+            'date_remise' => $validatedData['date_remise'],
+            'date_traitement' =>  isset($validatedData['date_traitement']) ? $validatedData['date_traitement'] : null,
+            // 'observation' => $validatedData['observation'],
+            'observation' => isset($validatedData['observation']) ? $validatedData['observation'] : null,
+            'delai_traitement' => $delaiTraitement, // Update delai_traitement
+        ]);
+
+        $production->user_id = auth()->user()->id;
+        return redirect('/tous/productions')->with('success', 'Production updated successfully');
+    }
+    // =============
 
     public function DeleteProduction(Production $production, $id)
     {
@@ -277,9 +258,9 @@ public function ResetProductionFilter()
         return redirect('/tous/productions')->with('success', 'Production deleted successfully');
     }
     // ==============
-    
-  
-// Production details ============== //
+
+
+    // Production details ============== //
 
 
 

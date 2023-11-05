@@ -7,12 +7,29 @@ use App\Models\SinistreDim;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Models\ActesGestionSinisterDimCategorie;
+use App\Models\ActeGestionsDim;
+use App\Models\SinistresDim;
 
 class SinisterDimDetailsController extends Controller
 {
     public function showSinisterDimDetails()
     {
-        return view('sinistresdim.sinistresdim-details');
+        $data = $this->getCcByActeGestionGSinisterDim();
+
+        $dataS = $this->getCcByActeGestionGSinisterDimSortie();
+
+        $dataN = $this->getCcByActeGestionGSinisterDimInstance();
+        $viewData = [
+            'data' => $data,
+            'dataS' => $dataS,
+            'dataN' => $dataN,
+            'categories' => $data['categories'],
+            'categories' => $dataS['categories'],
+            'categories' => $dataN['categories']
+        ];
+
+        return view('sinistresdim.sinistresdim-details', $viewData);
     }
 
     public function SinisterDimChartDateRemise()
@@ -87,12 +104,12 @@ class SinisterDimDetailsController extends Controller
         $last12MonthsEnd = now()->endOfMonth();
 
         // Calculate the mean delai_traitement for the current month
-        $meanDelaiCurrentMonth = SinistreDim::whereBetween('date_remise', [$currentMonthStart, $currentMonthEnd])
+        $meanDelaiCurrentMonth = SinistreDim::whereBetween('date_traitement', [$currentMonthStart, $currentMonthEnd])
             ->whereNotNull('delai_traitement')
             ->avg('delai_traitement');
 
         // Calculate the mean delai_traitement for the last 12 months
-        $meanDelaiLast12Months = SinistreDim::whereBetween('date_remise', [$last12MonthsStart, $last12MonthsEnd])
+        $meanDelaiLast12Months = SinistreDim::whereBetween('date_traitement', [$last12MonthsStart, $last12MonthsEnd])
             ->whereNotNull('delai_traitement')
             ->avg('delai_traitement');
 
@@ -106,10 +123,9 @@ class SinisterDimDetailsController extends Controller
     // ==========  ========== //
     public function SinisterDimChartByChargeCompte()
     {
-        // Assuming your ChargeCompte model has a 'name' attribute
+
         $chargeComptes = ChargeCompteDim::all();
 
-        // Your existing data retrieval logic
         $chargeCompteIds = SinistreDim::distinct('charge_compte_dim_id')->pluck('charge_compte_dim_id');
 
         $nullDateTraitementCount = [];
@@ -132,12 +148,12 @@ class SinisterDimDetailsController extends Controller
                 ->whereMonth('date_remise', now()->month)
                 ->count();
 
-            // Get the name for each charge_compte_id
+
             $chargeCompte = $chargeComptes->find($chargeCompteId);
             $chargeCompteNames[$chargeCompteId] = $chargeCompte ? $chargeCompte->nom : null;
         }
 
-        // Return data as JSON
+
         return response()->json([
             'chargeCompteIds' => $chargeCompteIds,
             'chargeCompteNames' => $chargeCompteNames,
@@ -147,14 +163,17 @@ class SinisterDimDetailsController extends Controller
         ]);
     }
 
-    // 12 months 
+
 
     public function SinisterDimChartChargeCompteTwelve()
     {
-        // Assuming your ChargeCompte model has a 'name' attribute
+
+
+
+
         $chargeComptes = ChargeCompteDim::all();
 
-        // Your existing data retrieval logic
+
         $chargeCompteIds = SinistreDim::distinct('charge_compte_dim_id')->pluck('charge_compte_dim_id');
 
         $nullDateTraitementCount = [];
@@ -165,16 +184,16 @@ class SinisterDimDetailsController extends Controller
         foreach ($chargeCompteIds as $chargeCompteId) {
             $nullDateTraitementCount[] = SinistreDim::where('charge_compte_dim_id', $chargeCompteId)
                 ->whereNull('date_traitement')
-                ->whereMonth('date_remise', '>=', now()->subMonths(12)->month)  // Modified condition
+                ->where('date_remise', '>=', now()->subMonths(12))  // Adjusted condition
                 ->count();
 
             $dateTraitementCount[] = SinistreDim::where('charge_compte_dim_id', $chargeCompteId)
                 ->whereNotNull('date_traitement')
-                ->whereMonth('date_traitement', '>=', now()->subMonths(12)->month)  // Modified condition
+                ->where('date_traitement', '>=', now()->subMonths(12))  // Adjusted condition
                 ->count();
 
             $dateRemiseCount[] = SinistreDim::where('charge_compte_dim_id', $chargeCompteId)
-                ->whereMonth('date_remise', '>=', now()->subMonths(12)->month)  // Modified condition
+                ->where('date_remise', '>=', now()->subMonths(12))  // Adjusted condition
                 ->count();
 
             // Get the name for each charge_compte_id
@@ -192,133 +211,327 @@ class SinisterDimDetailsController extends Controller
         ]);
     }
 
-    
+
     public function SinisterDimMeanDelaiTraitementByChargeCompte()
-{
-    // Your existing data retrieval logic
-    $chargeComptes = ChargeCompteDim::all(); 
+    {
 
-    $chargeCompteIds = SinistreDim::distinct('charge_compte_dim_id')->pluck('charge_compte_dim_id');
+        $chargeComptes = ChargeCompteDim::all();
 
-    $meanDelaiTraitementCurrentMonth = [];
-    $meanDelaiTraitementLast12Months = [];
-    $chargeCompteNames = [];
+        $chargeCompteIds = SinistreDim::distinct('charge_compte_dim_id')->pluck('charge_compte_dim_id');
 
-    foreach ($chargeCompteIds as $chargeCompteId) {
+        $meanDelaiTraitementCurrentMonth = [];
+        $meanDelaiTraitementLast12Months = [];
+        $chargeCompteNames = [];
+
+        foreach ($chargeCompteIds as $chargeCompteId) {
+            // Calculate the date range for the current month
+            $currentMonthStart = now()->startOfMonth();
+            $currentMonthEnd = now()->endOfMonth();
+
+            // Calculate the date range for the last 12 months, including the current month
+            $last12MonthsStart = now()->subMonths(12)->startOfMonth();
+            $last12MonthsEnd = now()->endOfMonth();
+
+            // Calculate the mean delai_traitement for the current month and charge_compte_id
+            $meanCurrentMonth = SinistreDim::where('charge_compte_dim_id', $chargeCompteId)
+                ->whereBetween('date_traitement', [$currentMonthStart, $currentMonthEnd])
+                ->whereNotNull('date_traitement')
+                ->avg('delai_traitement');
+
+            // Calculate the mean delai_traitement for the last 12 months and charge_compte_id
+            $meanLast12Months = SinistreDim::where('charge_compte_dim_id', $chargeCompteId)
+                ->whereBetween('date_traitement', [$last12MonthsStart, $last12MonthsEnd])
+                ->whereNotNull('date_traitement')
+                ->avg('delai_traitement');
+
+            $meanDelaiTraitementCurrentMonth[$chargeCompteId] = $meanCurrentMonth ?? 0; // Default to 0 if null
+            $meanDelaiTraitementLast12Months[$chargeCompteId] = $meanLast12Months ?? 0; // Default to 0 if null
+
+            $chargeCompte = $chargeComptes->find($chargeCompteId);
+            $chargeCompteNames[$chargeCompteId] = $chargeCompte ? $chargeCompte->nom : null;
+        }
+
+        // Return data as JSON with charge compte ids and names
+        return response()->json([
+            'chargeCompteIds' => $chargeCompteIds,
+            'chargeCompteNames' => $chargeCompteNames,
+            'meanDelaiTraitementCurrentMonth' => $meanDelaiTraitementCurrentMonth,
+            'meanDelaiTraitementLast12Months' => $meanDelaiTraitementLast12Months,
+        ]);
+    }
+
+    // ====
+
+    public function getTotalActGestionByCategoryMonthDim()
+    {
+        // Get all categories from the 'actes_gestion_production_categorie' table
+        $categories = DB::table('actes_gestion_sinister_dim_categorie')->pluck('categorie_name');
+
         // Calculate the date range for the current month
         $currentMonthStart = now()->startOfMonth();
         $currentMonthEnd = now()->endOfMonth();
 
-        // Calculate the date range for the last 12 months, including the current month
-        $last12MonthsStart = now()->subMonths(12)->startOfMonth();
-        $last12MonthsEnd = now()->endOfMonth();
+        // Initialize arrays to store counts for each category
+        $entryCounts = [];
+        $outgoingCounts = [];
+        $instanceCounts = [];
 
-        // Calculate the mean delai_traitement for the current month and charge_compte_id
-        $meanCurrentMonth = SinistreDim::where('charge_compte_dim_id', $chargeCompteId)
-            ->whereBetween('date_remise', [$currentMonthStart, $currentMonthEnd])
-            ->whereNotNull('delai_traitement')
-            ->avg('delai_traitement');
+        // Loop through each category
+        foreach ($categories as $category) {
+            // Count entries for the current category and date range
+            $entryCounts[] = SinistreDim::whereHas('acte_de_gestion_dim', function ($query) use ($category, $currentMonthStart, $currentMonthEnd) {
+                $query->where('categorie', $category)
+                    ->whereBetween('date_remise', [$currentMonthStart, $currentMonthEnd]);
+            })
+                ->count();
 
-        // Calculate the mean delai_traitement for the last 12 months and charge_compte_id
-        $meanLast12Months = SinistreDim::where('charge_compte_dim_id', $chargeCompteId)
-            ->whereBetween('date_remise', [$last12MonthsStart, $last12MonthsEnd])
-            ->whereNotNull('delai_traitement')
-            ->avg('delai_traitement');
+            // Count outings for the current category and date range
+            $outgoingCounts[] = SinistreDim::whereHas('acte_de_gestion_dim', function ($query) use ($category, $currentMonthStart, $currentMonthEnd) {
+                $query->where('categorie', $category)
+                    ->whereNotNull('date_traitement')
+                    ->whereBetween('date_traitement', [$currentMonthStart, $currentMonthEnd]);
+            })
+                ->count();
 
-        $meanDelaiTraitementCurrentMonth[$chargeCompteId] = $meanCurrentMonth ?? 0; // Default to 0 if null
-        $meanDelaiTraitementLast12Months[$chargeCompteId] = $meanLast12Months ?? 0; // Default to 0 if null
+            // Count instances for the current category and date range when date_traitement is null
+            $instanceCounts[] = SinistreDim::whereHas('acte_de_gestion_dim', function ($query) use ($category, $currentMonthStart, $currentMonthEnd) {
+                $query->where('categorie', $category)
+                    ->whereNull('date_traitement')
+                    ->whereBetween('date_remise', [$currentMonthStart, $currentMonthEnd]);
+            })
+                ->count();
+        }
 
-        $chargeCompte = $chargeComptes->find($chargeCompteId);
-        $chargeCompteNames[$chargeCompteId] = $chargeCompte ? $chargeCompte->nom : null;
+        // Return data as JSON
+        return response()->json([
+            'categories' => $categories,
+            'entryCounts' => $entryCounts,
+            'outgoingCounts' => $outgoingCounts,
+            'instanceCounts' => $instanceCounts,
+        ]);
     }
 
-    // Return data as JSON with charge compte ids and names
-    return response()->json([
-        'chargeCompteIds' => $chargeCompteIds,
-        'chargeCompteNames' => $chargeCompteNames,
-        'meanDelaiTraitementCurrentMonth' => $meanDelaiTraitementCurrentMonth,
-        'meanDelaiTraitementLast12Months' => $meanDelaiTraitementLast12Months,
-    ]);
-}
+    public function getTotalActGestionByCategoryTwelveMonthsDim()
+    {
+        // Get all categories from the 'actes_gestion_production_categorie' table
+        $categories = DB::table('actes_gestion_sinister_dim_categorie')->pluck('categorie_name');
 
-// ====
+        // Calculate the date range for the last 12 months, including the last month
+        $last12MonthsStart = now()->subMonths(12)->startOfMonth();
+        $currentMonthEnd = now()->endOfMonth();
 
-public function getTotalActGestionByCategoryMonthDim()
-{
-    // Calculate the date range for the current month
-    $currentMonthStart = now()->startOfMonth();
-    $currentMonthEnd = now()->endOfMonth();
+        // Initialize arrays to store counts for each category
+        $entryCounts = [];
+        $outgoingCounts = [];
+        $instanceCounts = [];
 
-    // Join 'act_gestions' table with 'productions' and filter by date range
-    $result = DB::table('acte_gestions_dim')
-        ->leftJoin('sinistres_dim', 'acte_gestions_dim.id', '=', 'sinistres_dim.acte_gestion_dim_id')
-        ->whereBetween('sinistres_dim.date_remise', [$currentMonthStart, $currentMonthEnd])
-        ->select('acte_gestions_dim.categorie', DB::raw('count(*) as total'))
-        ->groupBy('acte_gestions_dim.categorie')
-        ->get();
+        // Loop through each category
+        foreach ($categories as $category) {
+            // Count entries for the current category and date range
+            $entryCounts[] = SinistreDim::whereHas('acte_de_gestion_dim', function ($query) use ($category, $last12MonthsStart, $currentMonthEnd) {
+                $query->where('categorie', $category)
+                    ->whereBetween('date_remise', [$last12MonthsStart, $currentMonthEnd]);
+            })
+                ->count();
 
-    // Transform the result into an associative array
-    $chartData = $result->pluck('total', 'categorie')->toArray();
+            // Count outings for the current category and date range
+            $outgoingCounts[] = SinistreDim::whereHas('acte_de_gestion_dim', function ($query) use ($category, $last12MonthsStart, $currentMonthEnd) {
+                $query->where('categorie', $category)
+                    ->whereNotNull('date_traitement')
+                    ->whereBetween('date_traitement', [$last12MonthsStart, $currentMonthEnd]);
+            })
+                ->count();
 
-    return response()->json($chartData);
-}
+            // Count instances for the current category and date range when date_traitement is null
+            $instanceCounts[] = SinistreDim::whereHas('acte_de_gestion_dim', function ($query) use ($category, $last12MonthsStart, $currentMonthEnd) {
+                $query->where('categorie', $category)
+                    ->whereNull('date_traitement')
+                    ->whereBetween('date_remise', [$last12MonthsStart, $currentMonthEnd]);
+            })
+                ->count();
+        }
 
-public function getTotalActGestionByCategoryTwelveMonthsDim()
-{
-    // Calculate the date range for the last twelve months
-    $lastTwelveMonthsStart = now()->subMonths(12)->startOfMonth();
-    $currentMonthEnd = now()->endOfMonth();
+        // Return data as JSON
+        return response()->json([
+            'categories' => $categories,
+            'entryCounts' => $entryCounts,
+            'outgoingCounts' => $outgoingCounts,
+            'instanceCounts' => $instanceCounts,
+        ]);
+    }
+    private function getAverageByCategoryDim($startDate, $endDate)
+    {
+        $result = ActesGestionSinisterDimCategorie::select(
+                'actes_gestion_sinister_dim_categorie.categorie_name',
+                DB::raw('avg(sinistres_dim.delai_traitement) as average')
+            )
+            ->leftJoin('acte_gestions_dim', 'actes_gestion_sinister_dim_categorie.categorie_name', '=', 'acte_gestions_dim.categorie')
+            ->leftJoin('sinistres_dim', 'acte_gestions_dim.id', '=', 'sinistres_dim.acte_gestion_dim_id')
+            ->whereBetween('sinistres_dim.date_traitement', [$startDate, $endDate])
+            ->whereNotNull('sinistres_dim.date_traitement')
+            ->groupBy('actes_gestion_sinister_dim_categorie.categorie_name')
+            ->get();
+    
+        $averageData = $result->pluck('average', 'categorie_name')->toArray();
+    
+        return $averageData;
+    }
+    
+    public function getAverageActGestionByCategoryDim()
+    {
+        // Calculate the date range for the current month
+        $currentMonthStart = now()->startOfMonth();
+        $currentMonthEnd = now()->endOfMonth();
+    
+        // Calculate the date range for the last 12 months
+        $lastTwelveMonthsStart = now()->subMonths(12)->startOfMonth();
+        $lastTwelveMonthsEnd = now()->endOfMonth();
+    
+        // Get the average for the current month
+        $currentMonthAverage = $this->getAverageByCategoryDim($currentMonthStart, $currentMonthEnd);
+    
+        // Get the average for the last 12 months
+        $lastTwelveMonthsAverage = $this->getAverageByCategoryDim($lastTwelveMonthsStart, $lastTwelveMonthsEnd);
+    
+        return response()->json([
+            'current_month_average' => $currentMonthAverage,
+            'last_twelve_months_average' => $lastTwelveMonthsAverage,
+        ]);
+    }
 
-    // Join 'act_gestions' table with 'productions' and filter by date range
-    $result = DB::table('acte_gestions_dim')
-        ->leftJoin('sinistres_dim', 'acte_gestions_dim.id', '=', 'sinistres_dim.acte_gestion_dim_id')
-        ->whereBetween('sinistres_dim.date_remise', [$lastTwelveMonthsStart, $currentMonthEnd])
-        ->select('acte_gestions_dim.categorie', DB::raw('count(*) as total'))
-        ->groupBy('acte_gestions_dim.categorie')
-        ->get();
 
-    // Transform the result into an associative array
-    $chartData = $result->pluck('total', 'categorie')->toArray();
+    public function getCcByActeGestionGSinisterDim()
+    {
+        // Get the unique categories from the database
+        $categories = DB::table('actes_gestion_sinister_dim_categorie')->pluck('categorie_name');
 
-    return response()->json($chartData);
-}
+        // Get unique charge_compte_ids
+        $chargeCompteIds = ChargeCompteDim::pluck('id');
 
-public function getAverageActGestionByCategoryDim()
-{
-    // Calculate the date range for the current month
-    $currentMonthStart = now()->startOfMonth();
-    $currentMonthEnd = now()->endOfMonth();
+        // Initialize an array to store the data
+        $data = [];
 
-    // Calculate the date range for the last 12 months
-    $lastTwelveMonthsStart = now()->subMonths(12)->startOfMonth();
-    $lastTwelveMonthsEnd = now()->endOfMonth();
+        // Loop through each charge_compte_id
+        foreach ($chargeCompteIds as $chargeCompteId) {
+            // Get the corresponding charge_compte_name
+            $chargeCompte = ChargeCompteDim::find($chargeCompteId);
+            $chargeCompteName = $chargeCompte ? $chargeCompte->nom : 'Unknown';
 
-    // Get the average for the current month
-    $currentMonthAverage = $this->getAverageByCategoryDim($currentMonthStart, $currentMonthEnd);
+            // Initialize an array to store data for each charge_compte_id
+            $rowData = [
+                'charge_compte_dim_id' => $chargeCompteId,
+                'charge_compte_dim_name' => $chargeCompteName,
+            ];
 
-    // Get the average for the last 12 months
-    $lastTwelveMonthsAverage = $this->getAverageByCategoryDim($lastTwelveMonthsStart, $lastTwelveMonthsEnd);
+            // Loop through each category
+            foreach ($categories as $category) {
+                // Get the count of entries for the current charge_compte_id, category, and date_remise within the last twelve months
+                $count = SinistreDim::where('charge_compte_dim_id', $chargeCompteId)
+                    ->whereHas('acte_de_gestion_dim', function ($query) use ($category) {
+                        $query->where('categorie', $category);
+                    })
+                    ->whereBetween('date_remise', [now()->subMonths(12)->startOfMonth(), now()->endOfMonth()])
+                    ->count();
 
-    return response()->json([
-        'current_month_average' => $currentMonthAverage,
-        'last_twelve_months_average' => $lastTwelveMonthsAverage,
-    ]);
-}
+                // Store the count in the row data array
+                $rowData[$category] = $count;
+            }
 
-private function getAverageByCategoryDim($startDate, $endDate)
-{
-    // Join 'act_gestions' table with 'productions' and filter by date range
-    $result = DB::table('acte_gestions_dim')
-        ->leftJoin('sinistres_dim', 'acte_gestions_dim.id', '=', 'sinistres_dim.acte_gestion_dim_id')
-        ->whereBetween('sinistres_dim.date_remise', [$startDate, $endDate])
-        ->select('acte_gestions_dim.categorie', DB::raw('avg(sinistres_dim.acte_gestion_dim_id) as average'))
-        ->groupBy('acte_gestions_dim.categorie')
-        ->get();
+            // Add the row data to the main data array
+            $data[] = $rowData;
+        }
 
-    // Transform the result into an associative array
-    $averageData = $result->pluck('average', 'categorie')->toArray();
+        return ['categories' => $categories, 'data' => $data];
+    }
 
-    return $averageData;
-}
+    public function getCcByActeGestionGSinisterDimSortie()
+    {
+        // Get the unique categories from the database
+        $categories = DB::table('actes_gestion_sinister_dim_categorie')->pluck('categorie_name');
 
+        // Get unique charge_compte_ids
+        $chargeCompteIds = ChargeCompteDim::pluck('id');
+
+        // Initialize an array to store the data
+        $dataS = [];
+
+        // Loop through each charge_compte_id
+        foreach ($chargeCompteIds as $chargeCompteId) {
+            // Get the corresponding charge_compte_name
+            $chargeCompte = ChargeCompteDim::find($chargeCompteId);
+            $chargeCompteName = $chargeCompte ? $chargeCompte->nom : 'Unknown';
+
+            // Initialize an array to store data for each charge_compte_id
+            $rowData = [
+                'charge_compte_dim_id' => $chargeCompteId,
+                'charge_compte_dim_name' => $chargeCompteName,
+            ];
+
+            // Loop through each category
+            foreach ($categories as $category) {
+                // Get the count of entries for the current charge_compte_id, category, and date_traitement when not null within the last twelve months
+                $count = SinistreDim::where('charge_compte_dim_id', $chargeCompteId)
+                    ->whereHas('acte_de_gestion_dim', function ($query) use ($category) {
+                        $query->where('categorie', $category);
+                    })
+                    ->whereNotNull('date_traitement')
+                    ->whereBetween('date_traitement', [now()->subMonths(12)->startOfMonth(), now()->endOfMonth()])
+                    ->count();
+
+                // Store the count in the row data array
+                $rowData[$category] = $count;
+            }
+
+            // Add the row data to the main data array
+            $dataS[] = $rowData;
+        }
+
+        return ['categories' => $categories, 'dataS' => $dataS];
+    }
+
+    public function getCcByActeGestionGSinisterDimInstance()
+    {
+
+        // Get the unique categories from the database
+        $categories = DB::table('actes_gestion_sinister_dim_categorie')->pluck('categorie_name');
+
+        // Get unique charge_compte_ids
+        $chargeCompteIds = ChargeCompteDim::pluck('id');
+
+        // Initialize an array to store the data
+        $dataN = [];
+
+        // Loop through each charge_compte_id
+        foreach ($chargeCompteIds as $chargeCompteId) {
+            // Get the corresponding charge_compte_name
+            $chargeCompte = ChargeCompteDim::find($chargeCompteId);
+            $chargeCompteName = $chargeCompte ? $chargeCompte->nom : 'Unknown';
+
+            // Initialize an array to store data for each charge_compte_id
+            $rowData = [
+                'charge_compte_dim_id' => $chargeCompteId,
+                'charge_compte_dim_name' => $chargeCompteName,
+            ];
+
+            // Loop through each category
+            foreach ($categories as $category) {
+                // Get the count of entries for the current charge_compte_id, category, and null date_traitement within the last twelve months
+                $count = SinistreDim::where('charge_compte_dim_id', $chargeCompteId)
+                    ->whereHas('acte_de_gestion_dim', function ($query) use ($category) {
+                        $query->where('categorie', $category);
+                    })
+                    ->whereNull('date_traitement')
+                    ->whereBetween('created_at', [now()->subMonths(12)->startOfMonth(), now()->endOfMonth()])
+                    ->count();
+
+                // Store the count in the row data array
+                $rowData[$category] = $count;
+            }
+
+            // Add the row data to the main data array
+            $dataN[] = $rowData;
+        }
+
+        return ['categories' => $categories, 'dataN' => $dataN];
+    }
 }

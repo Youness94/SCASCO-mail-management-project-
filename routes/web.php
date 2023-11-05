@@ -148,8 +148,11 @@ Route::group(['middleware' => 'checkRole:Super Admin'], function () {
        
         Route::get('/total-act-gestion-by-categorie-month', 'getTotalActGestionByCategoryMonth')->name('production.act.gestion.group.month');
         Route::get('/total-act-gestion-by-category-twelve-month', 'getTotalActGestionByCategoryTwelveMonths')->name('production.act.gestion.group.twelve.month');
-        
         Route::get('/production-act-gestion-group-average-month', 'getAverageActGestionByCategory')->name('production.act.gestion.group.average.month');
+       
+        
+
+   
     });
    
 
@@ -193,7 +196,7 @@ Route::group(['middleware' => 'checkRole:Super Admin'], function () {
 
     Route::controller(RegisterController::class)->group(function () {
         Route::get('/register', 'register')->name('register');
-        Route::post('/register','storeUser')->name('register');    
+        Route::post('/register-post','storeUser')->name('register');    
     });
 
 

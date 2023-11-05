@@ -115,16 +115,16 @@ class SinistresAtRDController extends Controller
             'nom_victime' => 'required|string',
             'date_reception' => 'required|date',
             'date_remise' => 'required|date',
-            'date_traitement' => 'required|date',
+            'date_traitement' => 'nullable|date',
             'observation' => 'nullable|string',
         ]);
-    
+
         // Calculate the delai_traitement while excluding weekends
         $delaiTraitement = $this->calculateDelaiTraitement(
             $validatedData['date_remise'],
             $validatedData['date_traitement']
         );
-    
+
         // Create a new Sinistre instance
         $sinistre = new Sinistre([
             'branche_sinistre_id' => $validatedData['branche_sinistre_id'],
@@ -141,20 +141,24 @@ class SinistresAtRDController extends Controller
             'observation' => isset($validatedData['observation']) ? $validatedData['observation'] : null,
             'delai_traitement' => $delaiTraitement,
         ]);
-    
+
         // Associate the sinistre with the logged-in user
         $sinistre->user_id = auth()->user()->id;
-    
+
         // Save the Sinistre record
         $sinistre->save();
-    
+
         // Redirect to the index page or another appropriate page
-        return redirect('/tous/sinistres-at-rd')->with('success', 'Sinistre record created successfully');
+        return redirect('/ajouter/sinistre-at-rd')->with('success', 'Sinistre record created successfully');
     }
-    
+
 
     private function calculateDelaiTraitement($dateRemise, $dateTraitement)
     {
+        if ($dateTraitement === null) {
+            return null; // Return null for "en cours"
+        }
+
         $start = Carbon::parse($dateRemise);
         $end = Carbon::parse($dateTraitement);
 
@@ -197,7 +201,7 @@ class SinistresAtRDController extends Controller
             'nom_victime' => 'required|string',
             'date_reception' => 'required|date',
             'date_remise' => 'required|date',
-            'date_traitement' => 'required|date',
+            'date_traitement' => 'nullable|date',
             'observation' => 'nullable|string',
         ]);
 
@@ -222,7 +226,7 @@ class SinistresAtRDController extends Controller
             'nom_victime' => $validatedData['nom_victime'],
             'date_reception' => $validatedData['date_reception'],
             'date_remise' => $validatedData['date_remise'],
-            'date_traitement' => $validatedData['date_traitement'],
+            'date_traitement' =>  isset($validatedData['date_traitement']) ? $validatedData['date_traitement'] : null,
             'observation' => isset($validatedData['observation']) ? $validatedData['observation'] : null,
             'delai_traitement' => $delaiTraitement,
         ]);
@@ -244,5 +248,5 @@ class SinistresAtRDController extends Controller
 
     // ======= admin sinisters at and rd functions ====== 
 
-    
+
 }

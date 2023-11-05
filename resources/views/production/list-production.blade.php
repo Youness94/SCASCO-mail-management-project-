@@ -78,7 +78,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($productions as $key => $item)
+                                    @foreach ($productions->sortByDesc('date_reception') as $key => $item)
                                     <tr>
 
                                         <td>{{$key+1}}</td>

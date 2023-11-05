@@ -17,4 +17,11 @@ class ChargeCompte extends Model
     {
         return $this->hasMany(Production::class);
     }
+    public function actGestions()
+    {
+        return $this->belongsToMany(ActGestion::class, 'productions', 'charge_compte_id', 'act_gestion_id')
+            ->using(ActesGestionProductionCategorie::class)
+            ->withPivot(['categorie_id', 'production_id'])
+            ->withTimestamps();
+    }
 }

@@ -41,7 +41,7 @@ class ActGestionController extends Controller
         $actGestion->user()->associate($user);
         $actGestion->save();
 
-        return redirect('/tous/acte-gestions-production')->with('success', 'Acte Gestion created successfully');
+        return redirect('/tous/acte-gestions-production')->with('success', 'Créé Avec Succès');
     } else {
         return redirect()->back()->with('error', 'User not authenticated');
     }
@@ -84,13 +84,13 @@ class ActGestionController extends Controller
         $act_gestion->save();
         
 
-        return redirect('/tous/acte-gestions-production')->with('success', 'Branche updated successfully');
+        return redirect('/tous/acte-gestions-production')->with('success', 'Modifier Avec Succès');
     }
 
     public function DeleteActGestion(ActGestion $act_gestion, $id)
     {
     
         ActGestion::findOrFail($id)->delete();
-        return redirect('/tous/acte-gestions-production')->with('success', 'Branche deleted successfully');
+        return redirect('/tous/acte-gestions-production')->with('success', 'Supprimer Avec Succès');
     }
 }

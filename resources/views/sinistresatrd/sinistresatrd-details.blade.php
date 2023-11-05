@@ -248,6 +248,133 @@
                         </div>
                   </div>
             </div>
+
+            <div class="row">
+                  <div class="col-sm-12">
+                        <div class="card card-table">
+                              <div class="card-body">
+                              <div class="card-body">
+                                    <div class="page-header">
+                                          <div class="row align-items-center">
+                                                <div class="col">
+                                                      <h3 class="page-title">Entrées / actes groupés</h3>
+                                                </div>
+
+                                          </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                          <table class="table table-striped">
+                                                <thead>
+                                                      <tr>
+                                                            <!-- <th>Charge Compte ID</th> -->
+                                                            <th>Nom</th>
+                                                            @foreach($categories as $category)
+                                                            <th>{{ $category }}</th>
+                                                            @endforeach
+                                                      </tr>
+                                                </thead>
+                                                <tbody>
+                                                      @foreach($data['data'] as $rowData)
+                                                      <tr>
+                                                            <!-- <td>{{ $rowData['charge_compte_sinistre_id'] }}</td> -->
+                                                            <td>{{ $rowData['charge_compte_sinistre_name'] }}</td>
+                                                            @foreach($categories as $category)
+                                                            <td style="color: {{ $rowData[$category] == 0 ? 'gray' : 'blue' }}; font-size: {{ $rowData[$category] == 0 ? '14px' : '18px' }}">
+                                                                  {{ $rowData[$category] == 0 ? '-' : $rowData[$category]  }}
+                                                            </td>
+                                                            @endforeach
+                                                      </tr>
+                                                      @endforeach
+                                                </tbody>
+                                          </table>
+                                    </div>
+                              </div>
+                        </div>
+                  </div>
+            </div>
+            
+        
+            <div class="row">
+                  <div class="col-sm-12">
+                        <div class="card card-table">
+                              <div class="card-body">
+                                    <div class="page-header">
+                                          <div class="row align-items-center">
+                                                <div class="col">
+                                                      <h3 class="page-title">Sorties / actes groupés</h3>
+                                                </div>
+
+                                          </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                          <table class="table table-striped">
+                                                <thead>
+                                                      <tr>
+                                                            <th>Nom</th>
+                                                            @foreach($categories as $category)
+                                                            <th>{{ $category }}</th>
+                                                            @endforeach
+                                                      </tr>
+                                                </thead>
+                                                <tbody>
+                                                      @foreach($dataS['dataS'] as $rowData)
+                                                      <tr>
+                                                            <td>{{ $rowData['charge_compte_sinistre_name'] }}</td>
+
+                                                            @foreach($categories as $category)
+                                                            <td style="color: {{ $rowData[$category] == 0 ? 'gray' : 'blue' }}; font-size: {{ $rowData[$category] == 0 ? '14px' : '18px' }}">
+                                                                  {{ $rowData[$category] == 0 ? '-' : $rowData[$category]  }}</td>
+                                                            @endforeach
+                                                      </tr>
+                                                      @endforeach
+                                                </tbody>
+                                          </table>
+                                    </div>
+                              </div>
+                        </div>
+                  </div>
+            </div>
+            <div class="row">
+    <div class="col-sm-12">
+        <div class="card card-table">
+            <div class="card-body">
+                <div class="page-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h3 class="page-title">Instances / actes groupés</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <!-- <th>Charge Compte ID</th> -->
+                                <th>Nom</th>
+                                @foreach($categories as $category)
+                                <th>{{ $category }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($dataN['dataN'] as $rowData)
+                            <tr>
+                                <!-- <td>{{ $rowData['charge_compte_sinistre_id'] }}</td> -->
+                                <td>{{ $rowData['charge_compte_sinistre_name'] }}</td>
+                                @foreach($categories as $category)
+                                <td style="color: {{ $rowData[$category] == 0 ? 'gray' : 'blue' }}; font-size: {{ $rowData[$category] == 0 ? '14px' : '18px' }}">
+                                    {{ $rowData[$category] == 0 ? '-' : $rowData[$category]  }}
+                                </td>
+                                @endforeach
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
             <!-- =================================== -->
 
 

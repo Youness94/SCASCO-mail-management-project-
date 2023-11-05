@@ -236,14 +236,14 @@ $(document).ready(function () {
     //      "May 01 2022", "May 02 2022", "May 03 2022", "May 04 2022", "May 05 2022", "May 06 2022", "May 07 2022", "May 08 2022", "May 09 2022", "May 10 2022", "May 11 2022", "May 12 2022", "May 13 2022", "May 14 2022", "May 15 2022", "May 16 2022", "May 17 2022", "May 18 2022", "May 19 2022", "May 20 2022","May 21 2022", "May 22 2022", "May 23 2022", "May 24 2022", "May 25 2022", "May 26 2022", "May 27 2022", "May 28 2022", "May 29 2022", "May 30 2022",
     //    ]
 
-    // ========================
+    // ======================== fetch-monthly-production-data   monthlyProductionChart
 
     $(document).ready(function () {
         // Declare chartBar as a global variable outside the function
         var chartBar;
         var last12MonthsDate = new Date();
         last12MonthsDate.setMonth(last12MonthsDate.getMonth() - 12);
-
+    
         function fetchAndRefreshChart() {
             $.ajax({
                 url: "/fetch-monthly-production-data",
@@ -251,6 +251,13 @@ $(document).ready(function () {
                 dataType: "json",
                 data: { startDate: last12MonthsDate.toISOString() },
                 success: function (response) {
+                    // console.log("Response:", response);
+    
+                    // Sort the response data based on the order of months
+                    response.sort(function (a, b) {
+                        return months.indexOf(a.month) - months.indexOf(b.month);
+                    });
+    
                     var optionsBar = {
                         chart: {
                             type: "bar",
@@ -262,9 +269,8 @@ $(document).ready(function () {
                             enabled: true,
                             formatter: function (val) {
                                 return val;
-                                // return val === 1 ? val + " production" : val + " productions";
                             },
-                            offsetY: 10, // Adjust the offset to position the labels properly
+                            offsetY: 10,
                             style: {
                                 fontSize: "20px",
                                 colors: ["#FFFFFF"],
@@ -282,15 +288,18 @@ $(document).ready(function () {
                             {
                                 name: "Productions",
                                 color: "#70C4CF",
-                                data: response.map(
-                                    (production) => production.count
-                                ),
+                                data: response.map((production) => production.count),
                             },
                         ],
                         labels: response.map((production) => production.month),
                         xaxis: {
                             labels: {
-                                show: false,
+                                show: true,
+                                rotate: -45,
+                                style: {
+                                    fontSize: "14px",
+                                    colors: "#777",
+                                },
                             },
                             axisBorder: {
                                 show: false,
@@ -317,13 +326,20 @@ $(document).ready(function () {
                             align: "left",
                             style: { fontSize: "18px" },
                         },
+                        tooltip: {
+                            x: {
+                                formatter: function (value) {
+                                    return value;
+                                },
+                            },
+                        },
                     };
-
+    
                     // Destroy the existing chart before rendering a new one
                     if (chartBar) {
                         chartBar.destroy();
                     }
-
+    
                     // Use the global chartBar variable
                     chartBar = new ApexCharts(
                         document.querySelector("#monthlyProductionChart"),
@@ -336,12 +352,33 @@ $(document).ready(function () {
                 },
             });
         }
-
-        fetchAndRefreshChart();
-
+    
         // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
         setInterval(fetchAndRefreshChart, 30000);
+    
+        // Months array to define the order of months
+        var months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+        ];
+    
+        // Initial fetch
+        fetchAndRefreshChart();
     });
+    
+    
+    
+    
     //end chart production
 
     $(document).ready(function () {
@@ -392,12 +429,15 @@ $(document).ready(function () {
                                 ),
                             },
                         ],
-                        labels: response.map(
-                            (sinistres_dim) => sinistres_dim.month
-                        ),
+                        labels: response.map((production) => production.month),
                         xaxis: {
                             labels: {
-                                show: false,
+                                show: true,
+                                rotate: -45,
+                                style: {
+                                    fontSize: "14px",
+                                    colors: "#777",
+                                },
                             },
                             axisBorder: {
                                 show: false,
@@ -500,12 +540,15 @@ $(document).ready(function () {
                                 ),
                             },
                         ],
-                        labels: response.map(
-                            (sinistres_at_rd) => sinistres_at_rd.month
-                        ),
+                        labels: response.map((production) => production.month),
                         xaxis: {
                             labels: {
-                                show: false,
+                                show: true,
+                                rotate: -45,
+                                style: {
+                                    fontSize: "14px",
+                                    colors: "#777",
+                                },
                             },
                             axisBorder: {
                                 show: false,
@@ -562,7 +605,7 @@ $(document).ready(function () {
     $(document).ready(function () {
         // Variable to store the chart instance
         var chartPie;
-
+    
         function fetchAndRefreshChart() {
             $.ajax({
                 url: "/pie-chart",
@@ -571,6 +614,7 @@ $(document).ready(function () {
                 // Remove the date filtering to get data for all months
                 success: function (response) {
                     //   console.log(response);
+                    
                     new Chart(document.getElementById("pieChart"), {
                         type: "pie",
                         data: {
@@ -613,7 +657,7 @@ $(document).ready(function () {
                                         var percentage = Math.floor(
                                             (currentValue / total) * 100 + 0.5
                                         );
-                                        return percentage + "%";
+                                        return currentValue + " (" + percentage + "%)";
                                     },
                                 },
                             },
@@ -625,9 +669,9 @@ $(document).ready(function () {
                 },
             });
         }
-
+    
         fetchAndRefreshChart();
-
+    
         // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
         setInterval(fetchAndRefreshChart, 30000);
     });
@@ -1334,7 +1378,6 @@ $(document).ready(function () {
                 method: "GET",
                 dataType: "json",
                 success: function (response) {
-                    // console.log(response);
 
                     var optionsBar = {
                         chart: {
@@ -1544,7 +1587,6 @@ $(document).ready(function () {
                 method: "GET",
                 dataType: "json",
                 success: function (response) {
-                    // console.log(response);
 
                     var optionsBar = {
                         chart: {
@@ -1650,7 +1692,6 @@ $(document).ready(function () {
                 method: "GET",
                 dataType: "json",
                 success: function (response) {
-                    // console.log(response);
 
                     var optionsBar = {
                         chart: {
@@ -2236,7 +2277,7 @@ $(document).ready(function () {
                 method: "GET",
                 dataType: "json",
                 success: function (response) {
-                    console.log(response);
+                    // console.log(response);
 
                     var optionsBar = {
                         chart: {
@@ -2713,16 +2754,6 @@ $(document).ready(function () {
                 success: function (response) {
                     // Check if response is an object
                     if (typeof response === "object" && response !== null) {
-                        // Extract categories and their counts
-                        var categoriesWithCounts = Object.keys(response).map(
-                            function (category) {
-                                return {
-                                    name: category || "Unknown",
-                                    data: [response[category]],
-                                };
-                            }
-                        );
-    
                         // Configuration for the bar chart
                         var optionsBar = {
                             chart: {
@@ -2733,13 +2764,22 @@ $(document).ready(function () {
                             plotOptions: {
                                 bar: { horizontal: false, columnWidth: "40%" },
                             },
-                            series: categoriesWithCounts,
+                            series: [
+                                {
+                                    name: "Entrées",
+                                    data: response.entryCounts,
+                                },
+                                {
+                                    name: "Sorties",
+                                    data: response.outgoingCounts,
+                                },
+                                {
+                                    name: "Instances",
+                                    data: response.instanceCounts,
+                                },
+                            ],
                             xaxis: {
-                                categories: categoriesWithCounts.map(function (
-                                    item
-                                ) {
-                                    return item.name;
-                                }),
+                                categories: response.categories,
                                 labels: {
                                     style: {
                                         fontSize: "12px",
@@ -2751,7 +2791,7 @@ $(document).ready(function () {
                             },
                             yaxis: {
                                 title: {
-                                    text: "Total Par Acts Gestion",
+                                    text: "Total",
                                 },
                             },
                         };
@@ -2782,12 +2822,12 @@ $(document).ready(function () {
                 },
             });
         }
-    
+     // Initial fetch and render
+     fetchAndRefreshChart();
         // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
         setInterval(fetchAndRefreshChart, 30000);
     
-        // Initial fetch and render
-        fetchAndRefreshChart();
+       
     });
 
 
@@ -2801,75 +2841,82 @@ $(document).ready(function () {
                 method: "GET",
                 dataType: "json",
                 success: function (response) {
-                    // console.log("Response:", response);
-                  // Check if response is an object
-                  if (typeof response === "object" && response !== null) {
-                    // Extract categories and their counts
-                    var categoriesWithCounts = Object.keys(response).map(function (category) {
-                      return {
-                        name: category || "Unknown",
-                        data: [response[category]],
-                      };
-                    });
-          
-                    var optionsBar = {
-                      chart: {
-                        type: "bar",
-                        height: 350,
-                        toolbar: { show: false },
-                      },
-                      plotOptions: {
-                        bar: { horizontal: false, columnWidth: "40%" },
-                      },
-                      series: categoriesWithCounts,
-                      xaxis: {
-                        categories: categoriesWithCounts.map(function (item) {
-                          return item.name;
-                        }),
-                        labels: {
-                          style: {
-                            fontSize: "12px",
-                          },
-                        },
-                      },
-                      legend: {
-                        fontSize: "12px",
-                      },
-                      yaxis: {
-                        title: {
-                          text: "Comte",
-                        },
-                      },
-                    };
-          
-                    // Destroy the existing chart before rendering a new one
-                    if (chartBar) {
-                      chartBar.destroy();
+                    // Check if response is an object
+                    if (typeof response === "object" && response !== null) {
+                        // Configuration for the bar chart
+                        var optionsBar = {
+                            chart: {
+                                type: "bar",
+                                height: 350,
+                                toolbar: { show: false },
+                            },
+                            plotOptions: {
+                                bar: { horizontal: false, columnWidth: "40%" },
+                            },
+                            series: [
+                                {
+                                    name: "Entrées",
+                                    data: response.entryCounts,
+                                },
+                                {
+                                    name: "Sorties",
+                                    data: response.outgoingCounts,
+                                },
+                                {
+                                    name: "Instances",
+                                    data: response.instanceCounts,
+                                },
+                            ],
+                            xaxis: {
+                                categories: response.categories,
+                                labels: {
+                                    style: {
+                                        fontSize: "12px",
+                                    },
+                                },
+                            },
+                            legend: {
+                                fontSize: "12px",
+                            },
+                            yaxis: {
+                                title: {
+                                    text: "Total",
+                                },
+                            },
+                        };
+    
+                        // Destroy the existing chart before rendering a new one
+                        if (chartBar) {
+                            chartBar.destroy();
+                        }
+    
+                        // Create a new chart instance
+                        chartBar = new ApexCharts(
+                            document.querySelector("#acteGestionTwelveMois"),
+                            optionsBar
+                        );
+    
+                        // Render the chart
+                        chartBar.render();
+                    } else {
+                        console.error(
+                            "Invalid response format. Expected an object."
+                        );
                     }
-          
-                    // Create a new chart instance
-                    chartBar = new ApexCharts(document.querySelector("#acteGestionTwelveMois"), optionsBar);
-          
-                    // Render the chart
-                    chartBar.render();
-                  } else {
-                    console.error("Invalid response format. Expected an object.");
-                  }
                 },
                 error: function (error) {
-                  console.error("Error fetching data:", error);
-          
-                  // Log the status and response text
-                  console.log("Status:", error.status);
-                  console.log("Response Text:", error.responseText);
+                    console.error("Error fetching data:", error);
+                    console.log("Status:", error.status);
+                    console.log("Response Text:", error.responseText);
                 },
-              });
-            }
-
-        fetchAndRefreshChart();
-
-        // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
-        setInterval(fetchAndRefreshChart, 30000);
+            });
+        };
+        // Initial fetch and render
+     fetchAndRefreshChart();
+     // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
+     setInterval(fetchAndRefreshChart, 30000);
+ 
+    
     });
 
     $(document).ready(function () {
@@ -2884,10 +2931,16 @@ $(document).ready(function () {
                 success: function (response) {
                     // Check if response is an object
                     if (typeof response === "object" && response !== null) {
-                        // Extract categories and their corresponding data
-                        var categories = Object.keys(response.current_month_average);
-                        var currentMonthAverage = Object.values(response.current_month_average);
-                        var lastTwelveMonthsAverage = Object.values(response.last_twelve_months_average);
+                        var currentMonthData = response.current_month_average || {};
+                        var lastTwelveMonthsData = response.last_twelve_months_average || {};
+    
+                        var categories = Object.keys({ ...currentMonthData, ...lastTwelveMonthsData });
+    
+                        // Sort categories based on alphabetical order
+                        categories.sort();
+    
+                        var currentMonthAverage = categories.map(category => currentMonthData[category] || null);
+                        var lastTwelveMonthsAverage = categories.map(category => lastTwelveMonthsData[category] || null);
     
                         // Configuration for the bar chart
                         var optionsBar = {
@@ -2897,7 +2950,7 @@ $(document).ready(function () {
                                 toolbar: { show: false },
                             },
                             plotOptions: {
-                                bar: { horizontal: false, columnWidth: "40%" },
+                                bar: { horizontal: false, columnWidth: "60%" },
                             },
                             series: [
                                 {
@@ -2915,6 +2968,7 @@ $(document).ready(function () {
                                     style: {
                                         fontSize: "12px",
                                     },
+                                   
                                 },
                             },
                             legend: {
@@ -2923,6 +2977,11 @@ $(document).ready(function () {
                             yaxis: {
                                 title: {
                                     text: "Moyenne par actes de gestion",
+                                },
+                                labels: {
+                                    formatter: function (value) {
+                                        return parseFloat(value).toFixed(2);
+                                    },
                                 },
                             },
                         };
@@ -2973,20 +3032,9 @@ $(document).ready(function () {
                 url: "/total-act-gestion-by-categorie-month-dim", // Replace with your actual API endpoint
                 method: "GET",
                 dataType: "json",
-                success: function (response) {
-                    console.log(response)
+                 success: function (response) {
                     // Check if response is an object
                     if (typeof response === "object" && response !== null) {
-                        // Extract categories and their counts
-                        var categoriesWithCounts = Object.keys(response).map(
-                            function (category) {
-                                return {
-                                    name: category || "Unknown",
-                                    data: [response[category]],
-                                };
-                            }
-                        );
-    
                         // Configuration for the bar chart
                         var optionsBar = {
                             chart: {
@@ -2997,13 +3045,22 @@ $(document).ready(function () {
                             plotOptions: {
                                 bar: { horizontal: false, columnWidth: "40%" },
                             },
-                            series: categoriesWithCounts,
+                            series: [
+                                {
+                                    name: "Entrées",
+                                    data: response.entryCounts,
+                                },
+                                {
+                                    name: "Sorties",
+                                    data: response.outgoingCounts,
+                                },
+                                {
+                                    name: "Instances",
+                                    data: response.instanceCounts,
+                                },
+                            ],
                             xaxis: {
-                                categories: categoriesWithCounts.map(function (
-                                    item
-                                ) {
-                                    return item.name;
-                                }),
+                                categories: response.categories,
                                 labels: {
                                     style: {
                                         fontSize: "12px",
@@ -3015,7 +3072,7 @@ $(document).ready(function () {
                             },
                             yaxis: {
                                 title: {
-                                    text: "Total Par Acts Gestion",
+                                    text: "Total",
                                 },
                             },
                         };
@@ -3046,12 +3103,11 @@ $(document).ready(function () {
                 },
             });
         }
-    
+     // Initial fetch and render
+     fetchAndRefreshChart();
         // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
         setInterval(fetchAndRefreshChart, 30000);
-    
-        // Initial fetch and render
-        fetchAndRefreshChart();
+                       
     });
 
     $(document).ready(function () {
@@ -3064,94 +3120,8 @@ $(document).ready(function () {
                 method: "GET",
                 dataType: "json",
                 success: function (response) {
-                    // console.log("Response:", response);
-                  // Check if response is an object
-                  if (typeof response === "object" && response !== null) {
-                    // Extract categories and their counts
-                    var categoriesWithCounts = Object.keys(response).map(function (category) {
-                      return {
-                        name: category || "Unknown",
-                        data: [response[category]],
-                      };
-                    });
-          
-                    var optionsBar = {
-                      chart: {
-                        type: "bar",
-                        height: 350,
-                        toolbar: { show: false },
-                      },
-                      plotOptions: {
-                        bar: { horizontal: false, columnWidth: "40%" },
-                      },
-                      series: categoriesWithCounts,
-                      xaxis: {
-                        categories: categoriesWithCounts.map(function (item) {
-                          return item.name;
-                        }),
-                        labels: {
-                          style: {
-                            fontSize: "12px",
-                          },
-                        },
-                      },
-                      legend: {
-                        fontSize: "12px",
-                      },
-                      yaxis: {
-                        title: {
-                          text: "Comte",
-                        },
-                      },
-                    };
-          
-                    // Destroy the existing chart before rendering a new one
-                    if (chartBar) {
-                      chartBar.destroy();
-                    }
-          
-                    // Create a new chart instance
-                    chartBar = new ApexCharts(document.querySelector("#acteGestionTwelveMoisDim"), optionsBar);
-          
-                    // Render the chart
-                    chartBar.render();
-                  } else {
-                    console.error("Invalid response format. Expected an object.");
-                  }
-                },
-                error: function (error) {
-                  console.error("Error fetching data:", error);
-          
-                  // Log the status and response text
-                  console.log("Status:", error.status);
-                  console.log("Response Text:", error.responseText);
-                },
-              });
-            }
-
-        fetchAndRefreshChart();
-
-        // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
-        setInterval(fetchAndRefreshChart, 30000);
-    });
-
-    $(document).ready(function () {
-        // Variable to store the chart instance
-        var chartBar;
-    
-        function fetchAndRefreshChart() {
-            $.ajax({
-                url: "/act-gestion-group-average-month-dim", // Replace with your actual Laravel route
-                method: "GET",
-                dataType: "json",
-                success: function (response) {
                     // Check if response is an object
                     if (typeof response === "object" && response !== null) {
-                        // Extract categories and their corresponding data
-                        var categories = Object.keys(response.current_month_average);
-                        var currentMonthAverage = Object.values(response.current_month_average);
-                        var lastTwelveMonthsAverage = Object.values(response.last_twelve_months_average);
-    
                         // Configuration for the bar chart
                         var optionsBar = {
                             chart: {
@@ -3161,6 +3131,107 @@ $(document).ready(function () {
                             },
                             plotOptions: {
                                 bar: { horizontal: false, columnWidth: "40%" },
+                            },
+                            series: [
+                                {
+                                    name: "Entries",
+                                    data: response.entryCounts,
+                                },
+                                {
+                                    name: "Outings",
+                                    data: response.outgoingCounts,
+                                },
+                                {
+                                    name: "Instances",
+                                    data: response.instanceCounts,
+                                },
+                            ],
+                            xaxis: {
+                                categories: response.categories,
+                                labels: {
+                                    style: {
+                                        fontSize: "12px",
+                                    },
+                                },
+                            },
+                            legend: {
+                                fontSize: "12px",
+                            },
+                            yaxis: {
+                                title: {
+                                    text: "Total",
+                                },
+                            },
+                        };
+    
+                        // Destroy the existing chart before rendering a new one
+                        if (chartBar) {
+                            chartBar.destroy();
+                        }
+    
+                        // Create a new chart instance
+                        chartBar = new ApexCharts(
+                            document.querySelector("#acteGestionTwelveMoisDim"),
+                            optionsBar
+                        );
+    
+                        // Render the chart
+                        chartBar.render();
+                    } else {
+                        console.error(
+                            "Invalid response format. Expected an object."
+                        );
+                    }
+                },
+                error: function (error) {
+                    console.error("Error fetching data:", error);
+                    console.log("Status:", error.status);
+                    console.log("Response Text:", error.responseText);
+                },
+            });
+        };
+        // Initial fetch and render
+     fetchAndRefreshChart();
+     // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
+     setInterval(fetchAndRefreshChart, 30000);
+    });
+
+    
+    $(document).ready(function () {
+        // Variable to store the chart instance
+        var chartBar;
+        var desiredOrder = [
+          
+        ];
+        function fetchAndRefreshChart() {
+            $.ajax({
+                url: "/act-gestion-group-average-month-dim", // Replace with your actual Laravel route
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    // Check if response is an object
+                    console.log(response)
+                    if (typeof response === "object" && response !== null) {
+                        var currentMonthData = response.current_month_average || {};
+                        var lastTwelveMonthsData = response.last_twelve_months_average || {};
+    
+                        var categories = Object.keys({ ...currentMonthData, ...lastTwelveMonthsData });
+    
+                        // Sort categories based on alphabetical order
+                        categories.sort();
+    
+                        var currentMonthAverage = categories.map(category => currentMonthData[category] || null);
+                        var lastTwelveMonthsAverage = categories.map(category => lastTwelveMonthsData[category] || null);
+    
+                        // Configuration for the bar chart
+                        var optionsBar = {
+                            chart: {
+                                type: "bar",
+                                height: 350,
+                                toolbar: { show: false },
+                            },
+                            plotOptions: {
+                                bar: { horizontal: false, columnWidth: "60%" },
                             },
                             series: [
                                 {
@@ -3223,6 +3294,7 @@ $(document).ready(function () {
         setInterval(fetchAndRefreshChart, 30000);
     });
 
+
     // ======== 4-	Données par Actes regroupés ======== // sinister at rd
     
     $(document).ready(function () {
@@ -3236,19 +3308,8 @@ $(document).ready(function () {
                 method: "GET",
                 dataType: "json",
                 success: function (response) {
-                    console.log(response)
                     // Check if response is an object
                     if (typeof response === "object" && response !== null) {
-                        // Extract categories and their counts
-                        var categoriesWithCounts = Object.keys(response).map(
-                            function (category) {
-                                return {
-                                    name: category || "Unknown",
-                                    data: [response[category]],
-                                };
-                            }
-                        );
-    
                         // Configuration for the bar chart
                         var optionsBar = {
                             chart: {
@@ -3259,13 +3320,22 @@ $(document).ready(function () {
                             plotOptions: {
                                 bar: { horizontal: false, columnWidth: "40%" },
                             },
-                            series: categoriesWithCounts,
+                            series: [
+                                {
+                                    name: "Entrées",
+                                    data: response.entryCounts,
+                                },
+                                {
+                                    name: "Sorties",
+                                    data: response.outgoingCounts,
+                                },
+                                {
+                                    name: "Instances",
+                                    data: response.instanceCounts,
+                                },
+                            ],
                             xaxis: {
-                                categories: categoriesWithCounts.map(function (
-                                    item
-                                ) {
-                                    return item.name;
-                                }),
+                                categories: response.categories,
                                 labels: {
                                     style: {
                                         fontSize: "12px",
@@ -3277,7 +3347,7 @@ $(document).ready(function () {
                             },
                             yaxis: {
                                 title: {
-                                    text: "Total Par Acts Gestion",
+                                    text: "Total",
                                 },
                             },
                         };
@@ -3286,7 +3356,6 @@ $(document).ready(function () {
                         if (chartBar) {
                             chartBar.destroy();
                         }
-    
                         // Create a new chart instance
                         chartBar = new ApexCharts(
                             document.querySelector("#acteGestionMoisAtRd"),
@@ -3326,95 +3395,8 @@ $(document).ready(function () {
                 method: "GET",
                 dataType: "json",
                 success: function (response) {
-                    // console.log("Response:", response);
-                  // Check if response is an object
-                  if (typeof response === "object" && response !== null) {
-                    // Extract categories and their counts
-                    var categoriesWithCounts = Object.keys(response).map(function (category) {
-                      return {
-                        name: category || "Unknown",
-                        data: [response[category]],
-                      };
-                    });
-          
-                    var optionsBar = {
-                      chart: {
-                        type: "bar",
-                        height: 350,
-                        toolbar: { show: false },
-                      },
-                      plotOptions: {
-                        bar: { horizontal: false, columnWidth: "40%" },
-                      },
-                      series: categoriesWithCounts,
-                      xaxis: {
-                        categories: categoriesWithCounts.map(function (item) {
-                          return item.name;
-                        }),
-                        labels: {
-                          style: {
-                            fontSize: "12px",
-                          },
-                        },
-                      },
-                      legend: {
-                        fontSize: "12px",
-                      },
-                      yaxis: {
-                        title: {
-                          text: "Comte",
-                        },
-                      },
-                    };
-          
-                    // Destroy the existing chart before rendering a new one
-                    if (chartBar) {
-                      chartBar.destroy();
-                    }
-          
-                    // Create a new chart instance
-                    chartBar = new ApexCharts(document.querySelector("#acteGestionTwelveMoisAtRd"), optionsBar);
-          
-                    // Render the chart
-                    chartBar.render();
-                  } else {
-                    console.error("Invalid response format. Expected an object.");
-                  }
-                },
-                error: function (error) {
-                  console.error("Error fetching data:", error);
-          
-                  // Log the status and response text
-                  console.log("Status:", error.status);
-                  console.log("Response Text:", error.responseText);
-                },
-              });
-            }
-
-        fetchAndRefreshChart();
-
-        // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
-        setInterval(fetchAndRefreshChart, 30000);
-    });
-
-    $(document).ready(function () {
-        // Variable to store the chart instance
-        var chartBar;
-    
-        function fetchAndRefreshChart() {
-            $.ajax({
-                url: "/act-gestion-group-average-month-atrd", // Replace with your actual Laravel route
-                method: "GET",
-                dataType: "json",
-                success: function (response) {
                     // Check if response is an object
-                    console.log(response)
                     if (typeof response === "object" && response !== null) {
-                        // Extract categories and their corresponding data
-                        var categories = Object.keys(response.current_month_average);
-                        var currentMonthAverage = Object.values(response.current_month_average);
-                        var lastTwelveMonthsAverage = Object.values(response.last_twelve_months_average);
-    
                         // Configuration for the bar chart
                         var optionsBar = {
                             chart: {
@@ -3424,6 +3406,112 @@ $(document).ready(function () {
                             },
                             plotOptions: {
                                 bar: { horizontal: false, columnWidth: "40%" },
+                            },
+                            series: [
+                                {
+                                    name: "Entrées",
+                                    data: response.entryCounts,
+                                },
+                                {
+                                    name: "Sorties",
+                                    data: response.outgoingCounts,
+                                },
+                                {
+                                    name: "Instances",
+                                    data: response.instanceCounts,
+                                },
+                            ],
+                            xaxis: {
+                                categories: response.categories,
+                                labels: {
+                                    style: {
+                                        fontSize: "12px",
+                                    },
+                                },
+                            },
+                            legend: {
+                                fontSize: "12px",
+                            },
+                            yaxis: {
+                                title: {
+                                    text: "Total",
+                                },
+                            },
+                        };
+    
+                        // Destroy the existing chart before rendering a new one
+                        if (chartBar) {
+                            chartBar.destroy();
+                        }
+    
+                        // Create a new chart instance
+                        chartBar = new ApexCharts(
+                            document.querySelector("#acteGestionTwelveMoisAtRd"),
+                            optionsBar
+                        );
+    
+                        // Render the chart
+                        chartBar.render();
+                    } else {
+                        console.error(
+                            "Invalid response format. Expected an object."
+                        );
+                    }
+                },
+                error: function (error) {
+                    console.error("Error fetching data:", error);
+                    console.log("Status:", error.status);
+                    console.log("Response Text:", error.responseText);
+                },
+            });
+        };
+        // Initial fetch and render
+     fetchAndRefreshChart();
+     // Set up a timer to refresh the chart periodically (e.g., every 30 seconds)
+     setInterval(fetchAndRefreshChart, 30000);
+          
+                  
+    });
+
+    $(document).ready(function () {
+        // Variable to store the chart instance
+        var chartBar;
+        var desiredOrder = [
+            "Attestations de salaire et documents administratifs",
+            "Certificats médicaux et rapports",
+            "Déclaration de sinistre",
+            "Chèques et quittances de règlement",
+            // Add more categories in the desired order
+        ];
+        function fetchAndRefreshChart() {
+            $.ajax({
+                url: "/act-gestion-group-average-month-atrd", // Replace with your actual Laravel route
+                method: "GET",
+                dataType: "json",
+                success: function (response) {
+                    // Check if response is an object
+                    // console.log(response)
+                    if (typeof response === "object" && response !== null) {
+                        var currentMonthData = response.current_month_average || {};
+                        var lastTwelveMonthsData = response.last_twelve_months_average || {};
+    
+                        var categories = Object.keys({ ...currentMonthData, ...lastTwelveMonthsData });
+    
+                        // Sort categories based on alphabetical order
+                        categories.sort();
+    
+                        var currentMonthAverage = categories.map(category => currentMonthData[category] || null);
+                        var lastTwelveMonthsAverage = categories.map(category => lastTwelveMonthsData[category] || null);
+    
+                        // Configuration for the bar chart
+                        var optionsBar = {
+                            chart: {
+                                type: "bar",
+                                height: 350,
+                                toolbar: { show: false },
+                            },
+                            plotOptions: {
+                                bar: { horizontal: false, columnWidth: "60%" },
                             },
                             series: [
                                 {

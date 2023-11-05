@@ -204,7 +204,7 @@
 
                                 <div class="col-12">
                                     <div>
-                                        <button type="submit" class="btn btn-primary me-2">Soumettre</button>
+                                        <button type="submit" class="btn btn-primary me-2" id="submitBtn">Soumettre</button>
                                     </div>
                                 </div>
                             </div>
@@ -215,4 +215,28 @@
         </div>
     </div>
 </div>
+<script>
+    // Add this script to handle form submission
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('submitBtn').addEventListener('click', function () {
+            // Assuming you have a variable named success that indicates successful form submission
+            var success = true;
+
+            if (success) {
+                // If submission is successful, show a success message
+                toastr.success('Formulaire ajouté avec succès!');
+
+                // Display a Bootstrap alert as well
+                var successAlert = '<div class="alert alert-success" role="alert">This is a success alert—check it out!</div>';
+                document.getElementById('yourAlertContainer').innerHTML = successAlert;
+            }
+        });
+    });
+</script>
+
+<!-- Add this container where you want to display the Bootstrap alert -->
+<div id="yourAlertContainer">
+  <!-- <strong>Success!</strong> Indicates a successful or positive action. -->
+</div>
+
 @endsection

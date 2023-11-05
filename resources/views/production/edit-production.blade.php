@@ -110,7 +110,7 @@
                                         <select class="form-control" name="compagnie_id" id="compagnie_id">
                                             @foreach ($compagnies as $company)
                                             <option value="{{ $company->id }}" {{ $company->id == $production -> compagnie_id ? 'selected' : '' }}>
-                                                {{ $charge_compte->nom }}
+                                                {{ $company->nom  }}
                                             </option>
                                             @endforeach
                                         </select>

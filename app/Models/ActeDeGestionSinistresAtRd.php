@@ -29,6 +29,9 @@ class ActeDeGestionSinistresAtRd extends Model
     } 
     public function sinistres()
     {
-        return $this->belongsToMany(Sinistre::class);
+        return $this->belongsToMany(Sinistre::class, 'sinistres', 'acte_de_gestion_sinistre_id', 'charge_compte_sinistre_id')
+        ->using(ActesGestionSinisterAtrdCategorie::class)
+        ->withPivot(['categorie_id', 'sinistre_id'])
+        ->withTimestamps();
     }
 }

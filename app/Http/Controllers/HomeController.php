@@ -47,18 +47,20 @@ class HomeController extends Controller
 
     // =============
     public function fetchMonthlyProductionData()
-    {
-        $production = Production::selectRaw('MONTH(date_reception) as month, COUNT(*) as count')
-            ->groupByRaw('MONTH(date_reception)')
-            ->orderByRaw('MONTH(date_reception)')
-            ->get();
-    
-        return response()->json($production);
-    }
+{
+    $production = Production::selectRaw('MONTHNAME(date_reception) as month, COUNT(*) as count')
+        ->groupByRaw('MONTHNAME(date_reception)')
+        ->orderByRaw('STR_TO_DATE(CONCAT(MONTH(date_reception), " 1"), "%m %d")')
+        ->get();
+
+    return response()->json($production);
+}
+
+
     public function fetchMonthlySinistresDimData()
     {
-        $sinistres_dim = SinistreDim::selectRaw('MONTH(date_reception) as month, COUNT(*) as count')
-            ->groupByRaw('MONTH(date_reception)')
+        $sinistres_dim = SinistreDim::selectRaw('MONTHNAME(date_reception) as month, COUNT(*) as count')
+            ->groupByRaw('MONTHNAME(date_reception)')
             ->orderByRaw('MONTH(date_reception)')
             ->get();
     
@@ -66,8 +68,8 @@ class HomeController extends Controller
     }
     public function fetchMonthlySinistresAtRdData()
     {
-        $sinistres_at_rd = Sinistre::selectRaw('MONTH(date_reception) as month, COUNT(*) as count')
-            ->groupByRaw('MONTH(date_reception)')
+        $sinistres_at_rd = Sinistre::selectRaw('MONTHNAME(date_reception) as month, COUNT(*) as count')
+            ->groupByRaw('MONTHNAME(date_reception)')
             ->orderByRaw('MONTH(date_reception)')
             ->get();
     
@@ -99,16 +101,16 @@ class HomeController extends Controller
     }
 
     /** teacher dashboard */
-    public function teacherDashboardIndex()
-    {
-        return view('dashboard.teacher_dashboard');
-    }
+    // public function teacherDashboardIndex()
+    // {
+    //     return view('dashboard.teacher_dashboard');
+    // }
 
-    /** student dashboard */
-    public function studentDashboardIndex()
-    {
-        return view('dashboard.student_dashboard');
-    }
+    // /** student dashboard */
+    // public function studentDashboardIndex()
+    // {
+    //     return view('dashboard.student_dashboard');
+    // }
 
 
    

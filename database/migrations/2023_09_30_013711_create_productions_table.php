@@ -21,7 +21,7 @@ return new class extends Migration
 
             $table->foreignId('branche_id')->constrained('branches');
             $table->foreignId('compagnie_id')->constrained('compagnies');
-            $table->foreignId('act_gestion_id')->constrained('act_gestions');
+            $table->foreignId('act_gestion_id')->constrained('act_gestions', 'actes_gestion_production_categorie');
             $table->foreignId('charge_compte_id')->constrained('charge_comptes');
 
             $table->date('date_remise');

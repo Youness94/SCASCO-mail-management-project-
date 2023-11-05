@@ -23,7 +23,7 @@ return new class extends Migration
 
             $table->foreignId('branche_sinistre_id')->constrained('branches_sinistres_at_rd');
             $table->foreignId('compagnie_id')->constrained('compagnies');
-            $table->foreignId('acte_de_gestion_sinistre_id')->constrained('acte_de_gestion_sinistres_at_rd');
+            $table->foreignId('acte_de_gestion_sinistre_id')->constrained('acte_de_gestion_sinistres_at_rd', 'actes_gestion_sinister_atrd_categorie');
             $table->foreignId('charge_compte_sinistre_id')->constrained('charge_compte_sinistres_at_rd');
 
             $table->date('date_remise');

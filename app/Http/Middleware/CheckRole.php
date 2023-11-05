@@ -18,6 +18,6 @@ class CheckRole
         }
 
         // If the user doesn't have the required role, redirect or show an error
-        return redirect('/400'); // You can customize the redirection URL
+        return redirect('/login'); // You can customize the redirection URL
     }
 }

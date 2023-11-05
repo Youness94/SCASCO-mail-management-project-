@@ -11,15 +11,24 @@ use App\Models\ActGestion;
 
 class ProductioDetailsController extends Controller
 {
-    public function showProductionDetails()
-    {
-        return view('production.production-details');
-    }
+    // public function showProductionDetails()
+    // {
+    //     $data = $this->getCcByActeGestionGproduction();
 
+    //     $dataS = $this->getCcByActeGestionGproductionSortie();
+
+    //     $dataN = $this->getCcByActeGestionGproductionInstance();
+
+    //     return view('production.production-details', $data, $dataS, $dataN );
+    // }
+
+
+    // start function get the entries ===================
     public function getProductionChartDateRemise()
     {
 
         // Calculate the date range for the last month
+        // $lastMonthStart = Carbon::now()->subMonths(2)->startOfMonth();
         $lastMonthStart = Carbon::now()->startOfMonth();
         $lastMonthEnd = Carbon::now()->endOfMonth();
 
@@ -37,7 +46,9 @@ class ProductioDetailsController extends Controller
             'last12MonthsData' => $last12MonthsData,
         ]);
     }
+    // end function get the entries ===================
 
+    // start function get the outing ===================
     public function getProductionChartDateTraitement()
     {
 
@@ -60,6 +71,9 @@ class ProductioDetailsController extends Controller
         ]);
     }
 
+    // end function get the outing ===================
+
+    // start function get the instances ===================
     public function getProductionChartDateTraitementNull()
     {
         // Calculate the date range for the last month
@@ -77,6 +91,10 @@ class ProductioDetailsController extends Controller
         ]);
     }
 
+    // end function get the instances ===================
+
+
+
     public function calculateMeanDelaiTraitement()
     {
         // Calculate the date range for the current month
@@ -88,13 +106,13 @@ class ProductioDetailsController extends Controller
         $last12MonthsEnd = now()->endOfMonth();
 
         // Calculate the mean delai_traitement for the current month
-        $meanDelaiCurrentMonth = Production::whereBetween('date_remise', [$currentMonthStart, $currentMonthEnd])
-            ->whereNotNull('delai_traitement')
+        $meanDelaiCurrentMonth = Production::whereBetween('date_traitement', [$currentMonthStart, $currentMonthEnd])
+            ->whereNotNull('date_traitement')
             ->avg('delai_traitement');
 
         // Calculate the mean delai_traitement for the last 12 months
-        $meanDelaiLast12Months = Production::whereBetween('date_remise', [$last12MonthsStart, $last12MonthsEnd])
-            ->whereNotNull('delai_traitement')
+        $meanDelaiLast12Months = Production::whereBetween('date_traitement', [$last12MonthsStart, $last12MonthsEnd])
+            ->whereNotNull('date_traitement')
             ->avg('delai_traitement');
 
         // Return data as JSON
@@ -122,15 +140,18 @@ class ProductioDetailsController extends Controller
             $nullDateTraitementCount[] = Production::where('charge_compte_id', $chargeCompteId)
                 ->whereNull('date_traitement')
                 ->whereMonth('date_remise', now()->month)
+                ->whereYear('date_remise', now()->year)
                 ->count();
 
             $dateTraitementCount[] = Production::where('charge_compte_id', $chargeCompteId)
                 ->whereNotNull('date_traitement')
                 ->whereMonth('date_traitement', now()->month)
+                ->whereYear('date_traitement', now()->year)
                 ->count();
 
             $dateRemiseCount[] = Production::where('charge_compte_id', $chargeCompteId)
                 ->whereMonth('date_remise', now()->month)
+                ->whereYear('date_remise', now()->year)
                 ->count();
 
             // Get the name for each charge_compte_id
@@ -166,16 +187,16 @@ class ProductioDetailsController extends Controller
         foreach ($chargeCompteIds as $chargeCompteId) {
             $nullDateTraitementCount[] = Production::where('charge_compte_id', $chargeCompteId)
                 ->whereNull('date_traitement')
-                ->whereMonth('date_remise', '>=', now()->subMonths(12)->month)  // Modified condition
+                ->whereDate('date_remise', '>=', now()->subMonths(12))  // Modified condition
                 ->count();
 
             $dateTraitementCount[] = Production::where('charge_compte_id', $chargeCompteId)
                 ->whereNotNull('date_traitement')
-                ->whereMonth('date_traitement', '>=', now()->subMonths(12)->month)  // Modified condition
+                ->whereDate('date_traitement', '>=', now()->subMonths(12))  // Modified condition
                 ->count();
 
             $dateRemiseCount[] = Production::where('charge_compte_id', $chargeCompteId)
-                ->whereMonth('date_remise', '>=', now()->subMonths(12)->month)  // Modified condition
+                ->whereDate('date_remise', '>=', now()->subMonths(12))  // Modified condition
                 ->count();
 
             // Get the name for each charge_compte_id
@@ -193,103 +214,185 @@ class ProductioDetailsController extends Controller
         ]);
     }
 
-    
-    public function getMeanDelaiTraitementByChargeCompte()
-{
-    // Your existing data retrieval logic
-    $chargeComptes = ChargeCompte::all(); 
 
+    public function getMeanDelaiTraitementByChargeCompte()
+    {
+           // Get all charge comptes
+    $chargeComptes = ChargeCompte::all();
+
+    // Get unique charge_compte_ids from Production
     $chargeCompteIds = Production::distinct('charge_compte_id')->pluck('charge_compte_id');
 
+    // Initialize arrays to store mean delai_traitement values and charge compte names
     $meanDelaiTraitementCurrentMonth = [];
     $meanDelaiTraitementLast12Months = [];
     $chargeCompteNames = [];
 
     foreach ($chargeCompteIds as $chargeCompteId) {
-        // Calculate the date range for the current month
+        // Calculate date range for the current month
         $currentMonthStart = now()->startOfMonth();
         $currentMonthEnd = now()->endOfMonth();
 
-        // Calculate the date range for the last 12 months, including the current month
-        $last12MonthsStart = now()->subMonths(12)->startOfMonth();
+        // Calculate date range for the last 12 months, including the current month
+        $last12MonthsStart = now()->subMonths(12)->startOfMonth(); // Adjusted to include the current month
         $last12MonthsEnd = now()->endOfMonth();
 
-        // Calculate the mean delai_traitement for the current month and charge_compte_id
+        // Calculate mean delai_traitement for the current month and charge_compte_id
         $meanCurrentMonth = Production::where('charge_compte_id', $chargeCompteId)
-            ->whereBetween('date_remise', [$currentMonthStart, $currentMonthEnd])
-            ->whereNotNull('delai_traitement')
+            ->whereBetween('date_traitement', [$currentMonthStart, $currentMonthEnd])
+            ->whereNotNull('date_traitement')
             ->avg('delai_traitement');
 
-        // Calculate the mean delai_traitement for the last 12 months and charge_compte_id
+        // Calculate mean delai_traitement for the last 12 months and charge_compte_id
         $meanLast12Months = Production::where('charge_compte_id', $chargeCompteId)
-            ->whereBetween('date_remise', [$last12MonthsStart, $last12MonthsEnd])
-            ->whereNotNull('delai_traitement')
+            ->whereBetween('date_traitement', [$last12MonthsStart, $last12MonthsEnd])
+            ->whereNotNull('date_traitement')
             ->avg('delai_traitement');
 
-        $meanDelaiTraitementCurrentMonth[$chargeCompteId] = $meanCurrentMonth ?? 0; // Default to 0 if null
-        $meanDelaiTraitementLast12Months[$chargeCompteId] = $meanLast12Months ?? 0; // Default to 0 if null
+        // Store mean values in arrays, default to 0 if null
+        $meanDelaiTraitementCurrentMonth[$chargeCompteId] = $meanCurrentMonth ?? 0;
+        $meanDelaiTraitementLast12Months[$chargeCompteId] = $meanLast12Months ?? 0;
 
+        // Get charge compte by id and store its name in the array
         $chargeCompte = $chargeComptes->find($chargeCompteId);
         $chargeCompteNames[$chargeCompteId] = $chargeCompte ? $chargeCompte->nom : null;
     }
 
-    // Return data as JSON with charge compte ids and names
+    // Return data as JSON with charge compte ids, names, and mean values
     return response()->json([
         'chargeCompteIds' => $chargeCompteIds,
         'chargeCompteNames' => $chargeCompteNames,
         'meanDelaiTraitementCurrentMonth' => $meanDelaiTraitementCurrentMonth,
         'meanDelaiTraitementLast12Months' => $meanDelaiTraitementLast12Months,
     ]);
-}
+
+    }
 
 
 
 
-public function getTotalActGestionByCategoryMonth()
-{
-    // Calculate the date range for the current month
-    $currentMonthStart = now()->startOfMonth();
-    $currentMonthEnd = now()->endOfMonth();
+    // public function getTotalActGestionByCategoryMonth()
+    // {
+    //     // Calculate the date range for the current month
+    //     $currentMonthStart = now()->startOfMonth();
+    //     $currentMonthEnd = now()->endOfMonth();
 
-    // Join 'act_gestions' table with 'productions' and filter by date range
-    $result = DB::table('act_gestions')
-        ->leftJoin('productions', 'act_gestions.id', '=', 'productions.act_gestion_id')
-        ->whereBetween('productions.date_remise', [$currentMonthStart, $currentMonthEnd])
-        ->select('act_gestions.categorie', DB::raw('count(*) as total'))
-        ->groupBy('act_gestions.categorie')
-        ->get();
+    //     // Join 'act_gestions' table with 'productions' and filter by date range
+    //     $result = DB::table('act_gestions')
+    //         ->leftJoin('productions', 'act_gestions.id', '=', 'productions.act_gestion_id')
+    //         ->whereBetween('productions.date_remise', [$currentMonthStart, $currentMonthEnd])
+    //         ->select('act_gestions.categorie', DB::raw('count(*) as total'))
+    //         ->groupBy('act_gestions.categorie')
+    //         ->get();
 
-    // Transform the result into an associative array
-    $chartData = $result->pluck('total', 'categorie')->toArray();
+    //     // Transform the result into an associative array
+    //     $chartData = $result->pluck('total', 'categorie')->toArray();
 
-    return response()->json($chartData);
-}
+    //     return response()->json($chartData);
+    // }
+    public function getTotalActGestionByCategoryMonth()
+    {
+        // Get all categories from the 'actes_gestion_production_categorie' table
+        $categories = DB::table('actes_gestion_production_categorie')->pluck('categorie_name');
+
+        // Calculate the date range for the current month
+        $currentMonthStart = now()->startOfMonth();
+        $currentMonthEnd = now()->endOfMonth();
+
+        // Initialize arrays to store counts for each category
+        $entryCounts = [];
+        $outgoingCounts = [];
+        $instanceCounts = [];
+
+        // Loop through each category
+        foreach ($categories as $category) {
+            // Count entries for the current category and date range
+            $entryCounts[] = Production::whereHas('act_gestions', function ($query) use ($category, $currentMonthStart, $currentMonthEnd) {
+                $query->where('categorie', $category)
+                    ->whereBetween('date_remise', [$currentMonthStart, $currentMonthEnd]);
+            })
+                ->count();
+
+            // Count outings for the current category and date range
+            $outgoingCounts[] = Production::whereHas('act_gestions', function ($query) use ($category, $currentMonthStart, $currentMonthEnd) {
+                $query->where('categorie', $category)
+                    ->whereNotNull('date_traitement')
+                    ->whereBetween('date_traitement', [$currentMonthStart, $currentMonthEnd]);
+            })
+                ->count();
+
+            // Count instances for the current category and date range when date_traitement is null
+            $instanceCounts[] = Production::whereHas('act_gestions', function ($query) use ($category, $currentMonthStart, $currentMonthEnd) {
+                $query->where('categorie', $category)
+                    ->whereNull('date_traitement')
+                    ->whereBetween('date_remise', [$currentMonthStart, $currentMonthEnd]);
+            })
+                ->count();
+        }
+
+        // Return data as JSON
+        return response()->json([
+            'categories' => $categories,
+            'entryCounts' => $entryCounts,
+            'outgoingCounts' => $outgoingCounts,
+            'instanceCounts' => $instanceCounts,
+        ]);
+    }
 
 
-public function getTotalActGestionByCategoryTwelveMonths()
-{
-    // Calculate the date range for the last twelve months
-    $lastTwelveMonthsStart = now()->subMonths(12)->startOfMonth();
-    $currentMonthEnd = now()->endOfMonth();
+    public function getTotalActGestionByCategoryTwelveMonths()
+    {
+        // Get all categories from the 'actes_gestion_production_categorie' table
+        $categories = DB::table('actes_gestion_production_categorie')->pluck('categorie_name');
 
-    // Join 'act_gestions' table with 'productions' and filter by date range
-    $result = DB::table('act_gestions')
-        ->leftJoin('productions', 'act_gestions.id', '=', 'productions.act_gestion_id')
-        ->whereBetween('productions.date_remise', [$lastTwelveMonthsStart, $currentMonthEnd])
-        ->select('act_gestions.categorie', DB::raw('count(*) as total'))
-        ->groupBy('act_gestions.categorie')
-        ->get();
+        // Calculate the date range for the last 12 months, including the last month
+        $last12MonthsStart = now()->subMonths(12)->startOfMonth();
+        $currentMonthEnd = now()->endOfMonth();
 
-    // Transform the result into an associative array
-    $chartData = $result->pluck('total', 'categorie')->toArray();
+        // Initialize arrays to store counts for each category
+        $entryCounts = [];
+        $outgoingCounts = [];
+        $instanceCounts = [];
 
-    return response()->json($chartData);
-}
+        // Loop through each category
+        foreach ($categories as $category) {
+            // Count entries for the current category and date range
+            $entryCounts[] = Production::whereHas('act_gestions', function ($query) use ($category, $last12MonthsStart, $currentMonthEnd) {
+                $query->where('categorie', $category)
+                    ->whereBetween('date_remise', [$last12MonthsStart, $currentMonthEnd]);
+            })
+                ->count();
+
+            // Count outings for the current category and date range
+            $outgoingCounts[] = Production::whereHas('act_gestions', function ($query) use ($category, $last12MonthsStart, $currentMonthEnd) {
+                $query->where('categorie', $category)
+                    ->whereNotNull('date_traitement')
+                    ->whereBetween('date_traitement', [$last12MonthsStart, $currentMonthEnd]);
+            })
+                ->count();
+
+            // Count instances for the current category and date range when date_traitement is null
+            $instanceCounts[] = Production::whereHas('act_gestions', function ($query) use ($category, $last12MonthsStart, $currentMonthEnd) {
+                $query->where('categorie', $category)
+                    ->whereNull('date_traitement')
+                    ->whereBetween('date_remise', [$last12MonthsStart, $currentMonthEnd]);
+            })
+                ->count();
+        }
+
+        // Return data as JSON
+        return response()->json([
+            'categories' => $categories,
+            'entryCounts' => $entryCounts,
+            'outgoingCounts' => $outgoingCounts,
+            'instanceCounts' => $instanceCounts,
+        ]);
+    }
 
 
-public function getAverageActGestionByCategory()
-{
-    // Calculate the date range for the current month
+    public function getAverageActGestionByCategory()
+    {
+        // Calculate the date range for the current month
     $currentMonthStart = now()->startOfMonth();
     $currentMonthEnd = now()->endOfMonth();
 
@@ -307,21 +410,180 @@ public function getAverageActGestionByCategory()
         'current_month_average' => $currentMonthAverage,
         'last_twelve_months_average' => $lastTwelveMonthsAverage,
     ]);
+    }
+
+    private function getAverageByCategory($startDate, $endDate)
+    {
+        
+     // Join 'act_gestions' table with 'productions' and filter by date range
+    $result = DB::table('actes_gestion_production_categorie') // Changed to the correct table
+    ->leftJoin('act_gestions', 'actes_gestion_production_categorie.categorie_name', '=', 'act_gestions.categorie') // Join with the right column
+    ->leftJoin('productions', 'act_gestions.id', '=', 'productions.act_gestion_id')
+    ->whereBetween('productions.date_traitement', [$startDate, $endDate])
+    ->whereNotNull('productions.date_traitement') // Ensure delai_traitement is not null
+    ->select('actes_gestion_production_categorie.categorie_name', DB::raw('avg(productions.delai_traitement) as average'))
+    ->groupBy('actes_gestion_production_categorie.categorie_name')
+    ->get();
+
+// Transform the result into an associative array
+$averageData = $result->pluck('average', 'categorie_name')->toArray();
+
+return $averageData;
+
+    }
+
+    public function getCcByActeGestionGproduction()
+    { // Get the unique categories
+        $categories = DB::table('actes_gestion_production_categorie')->pluck('categorie_name');
+    
+        // Get unique charge_compte_ids
+        $chargeCompteIds = ChargeCompte::pluck('id');
+    
+        // Initialize an array to store the data
+        $data = [];
+    
+        // Loop through each charge_compte_id
+        foreach ($chargeCompteIds as $chargeCompteId) {
+            // Get the corresponding charge_compte_name
+            $chargeCompte = ChargeCompte::find($chargeCompteId);
+            $chargeCompteName = $chargeCompte ? $chargeCompte->nom : 'Unknown';
+    
+            // Initialize an array to store data for each charge_compte_id
+            $rowData = [
+                'charge_compte_id' => $chargeCompteId,
+                'charge_compte_name' => $chargeCompteName,
+            ];
+    
+            // Loop through each category
+            foreach ($categories as $category) {
+                // Get the count of entries for the current charge_compte_id, category, and last 12 months
+                $count = Production::where('charge_compte_id', $chargeCompteId)
+                    ->whereHas('act_gestions', function ($query) use ($category) {
+                        $query->where('categorie', $category);
+                    })
+                    ->where('date_remise', '>=', now()->subMonths(12))
+                    ->where('date_remise', '<=', now())
+                    ->count();
+    
+                // Store the count in the row data array
+                $rowData[$category] = $count;
+            }
+    
+            // Add the row data to the main data array
+            $data[] = $rowData;
+        }
+    
+        // Return the result with unique categories and organized data
+        return ['categories' => $categories, 'data' => $data];
 }
 
-private function getAverageByCategory($startDate, $endDate)
-{
-    // Join 'act_gestions' table with 'productions' and filter by date range
-    $result = DB::table('act_gestions')
-        ->leftJoin('productions', 'act_gestions.id', '=', 'productions.act_gestion_id')
-        ->whereBetween('productions.date_remise', [$startDate, $endDate])
-        ->select('act_gestions.categorie', DB::raw('avg(productions.act_gestion_id) as average'))
-        ->groupBy('act_gestions.categorie')
-        ->get();
+    public function getCcByActeGestionGproductionSortie()
+    {
+        // Get the unique categories
+        $categories = DB::table('actes_gestion_production_categorie')->pluck('categorie_name');
+    
+        // Get unique charge_compte_ids
+        $chargeCompteIds = ChargeCompte::pluck('id');
+    
+        // Initialize an array to store the data
+        $dataS = [];
+    
+        // Loop through each charge_compte_id
+        foreach ($chargeCompteIds as $chargeCompteId) {
+            // Get the corresponding charge_compte_name
+            $chargeCompte = ChargeCompte::find($chargeCompteId);
+            $chargeCompteName = $chargeCompte ? $chargeCompte->nom : 'Unknown';
+    
+            // Initialize an array to store data for each charge_compte_id
+            $rowData = [
+                'charge_compte_id' => $chargeCompteId,
+                'charge_compte_name' => $chargeCompteName,
+            ];
+    
+            // Loop through each category
+            foreach ($categories as $category) {
+                // Get the count of entries for the current charge_compte_id, category, and last 12 months
+                $count = Production::where('charge_compte_id', $chargeCompteId)
+                    ->whereHas('act_gestions', function ($query) use ($category) {
+                        $query->where('categorie', $category);
+                    })
+                    ->where('date_traitement', '>=', now()->subMonths(12))
+                    ->where('date_traitement', '<=', now())
+                    ->count();
+    
+                // Store the count in the row data array
+                $rowData[$category] = $count;
+            }
+    
+            // Add the row data to the main data array
+            $dataS[] = $rowData;
+        }
 
-    // Transform the result into an associative array
-    $averageData = $result->pluck('average', 'categorie')->toArray();
+        return ['categories' => $categories, 'dataS' => $dataS];
+    }
 
-    return $averageData;
-}
+    public function getCcByActeGestionGproductionInstance()
+    {
+        // Get the unique categories from the database
+        $categories = DB::table('actes_gestion_production_categorie')->pluck('categorie_name');
+
+        // Get unique charge_compte_ids
+        $chargeCompteIds = ChargeCompte::pluck('id');
+
+        // Initialize an array to store the data
+        $dataN = [];
+
+        // Loop through each charge_compte_id
+        foreach ($chargeCompteIds as $chargeCompteId) {
+            // Get the corresponding charge_compte_name
+            $chargeCompte = ChargeCompte::find($chargeCompteId);
+            $chargeCompteName = $chargeCompte ? $chargeCompte->nom : 'Unknown';
+
+            // Initialize an array to store data for each charge_compte_id
+            $rowData = [
+                'charge_compte_id' => $chargeCompteId,
+                'charge_compte_name' => $chargeCompteName,
+            ];
+
+            // Loop through each category
+            foreach ($categories as $category) {
+                // Get the count of entries for the current charge_compte_id, category, and null date_traitement
+                $count = Production::where('charge_compte_id', $chargeCompteId)
+                    ->whereHas('act_gestions', function ($query) use ($category) {
+                        $query->where('categorie', $category);
+                    })
+                    ->whereNull('date_traitement')
+                    ->groupBy('act_gestion_id') // Group by act_gestion_id
+                    ->count();
+
+                // Store the count in the row data array
+                $rowData[$category] = $count;
+            }
+
+            // Add the row data to the main data array
+            $dataN[] = $rowData;
+        }
+
+        // dd($dataN);
+
+        return ['categories' => $categories, 'dataN' => $dataN];
+    }
+
+    public function showProductionDetails()
+    {
+        $data = $this->getCcByActeGestionGproduction();
+
+        $dataS = $this->getCcByActeGestionGproductionSortie();
+
+        $dataN = $this->getCcByActeGestionGproductionInstance();
+        $viewData = [
+            'data' => $data,
+            'dataS' => $dataS,
+            'dataN' => $dataN,
+            'categories' => $data['categories'],
+            'categories' => $dataS['categories'],
+            'categories' => $dataN['categories']
+        ];
+        return view('production.production-details', $viewData);
+    }
 }

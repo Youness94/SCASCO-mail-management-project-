@@ -29,6 +29,9 @@ class ChargeCompteDim extends Model
   } 
   public function sinistres_dim()
   {
-      return $this->belongsToMany(SinistreDim::class);
+      return $this->belongsToMany(SinistreDim::class, 'sinistres_dim', 'acte_gestion_dim_id', 'charge_compte_dim_id')
+      ->using(ActesGestionSinisterDimCategorie::class)
+      ->withPivot(['categorie_id', 'sinistre_dim_id'])
+      ->withTimestamps();
   }
 }

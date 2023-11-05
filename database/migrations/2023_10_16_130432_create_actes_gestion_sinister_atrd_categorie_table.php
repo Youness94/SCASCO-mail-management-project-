@@ -20,8 +20,8 @@ return new class extends Migration
         });
         DB::table('actes_gestion_sinister_atrd_categorie')->insert([
             ['categorie_name' => 'Certificats médicaux et rapports'],
-            ['categorie_name' => 'Chèques et quittances de règlement'],
             ['categorie_name' => 'Déclaration de sinistre'],
+            ['categorie_name' => 'Chèques et quittances de règlement'],
             ['categorie_name' => 'Attestations de salaire et documents administratifs'],
             
         ]);
