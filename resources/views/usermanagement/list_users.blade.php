@@ -69,11 +69,11 @@
                                                     <i class="feather-edit"></i>
                                                 </a>
                                                 @endif
-                                                @if (Session::get('role_name') === 'Super Admin')
+                                                <!-- @if (Session::get('role_name') === 'Super Admin')
                                                 <a class="btn btn-sm bg-danger-light user_delete" data-bs-toggle="modal" data-bs-target="#deleteUser">
                                                     <i class="feather-trash-2 me-1"></i>
                                                 </a>
-                                                @endif
+                                                @endif -->
                                             </div>
                                         </td>
                                     </tr>
@@ -88,7 +88,7 @@
     </div>
 </div>
 
-{{-- model user delete --}}
+<!-- {{-- model user delete --}}
 <div class="modal fade contentmodal" id="deleteUser" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content doctor-profile">
@@ -97,14 +97,15 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form action="{{ route('user/delete') }}" method="POST">
+            
+            <form action="{{ route('user/delete') }}" method="POST">
                     @csrf
                     <div class="delete-wrap text-center">
                         <div class="del-icon">
                             <i class="feather-x-circle"></i>
                         </div>
                         <input type="hidden" name="user_id" class="e_user_id" value="">
-                        <input type="hidden" name="avatar" class="e_avatar" value="">
+                        <input type="hidden" name="photo" class="e_photo" value="">
                         <h2>Sure you want to delete</h2>
                         <div class="submit-section">
                             <button type="submit" class="btn btn-success me-2">Yes</button>
@@ -112,6 +113,7 @@
                         </div>
                     </div>
                 </form>
+               
             </div>
         </div>
     </div>
@@ -124,9 +126,9 @@
     $(document).on('click', '.user_delete', function() {
         var _this = $(this).parents('tr');
         $('.e_user_id').val(_this.find('.user_id').text());
-        $('.e_avatar').val(_this.find('.avatar').text());
+        $('.e_photo').val(_this.find('.photo').text());
     });
 </script>
-@endsection
+@endsection -->
 
-@endsection
+@endsection 

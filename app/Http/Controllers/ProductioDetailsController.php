@@ -461,8 +461,8 @@ return $averageData;
                     ->whereHas('act_gestions', function ($query) use ($category) {
                         $query->where('categorie', $category);
                     })
-                    ->where('date_remise', '>=', now()->subMonths(12))
-                    ->where('date_remise', '<=', now())
+                    ->where('date_remise', '>=', now()->subMonths(12)->startOfMonth())
+                    ->where('date_remise', '<=', now()->endOfMonth())
                     ->count();
     
                 // Store the count in the row data array
@@ -479,94 +479,93 @@ return $averageData;
 
     public function getCcByActeGestionGproductionSortie()
     {
-        // Get the unique categories
-        $categories = DB::table('actes_gestion_production_categorie')->pluck('categorie_name');
-    
-        // Get unique charge_compte_ids
-        $chargeCompteIds = ChargeCompte::pluck('id');
-    
-        // Initialize an array to store the data
-        $dataS = [];
-    
-        // Loop through each charge_compte_id
-        foreach ($chargeCompteIds as $chargeCompteId) {
-            // Get the corresponding charge_compte_name
-            $chargeCompte = ChargeCompte::find($chargeCompteId);
-            $chargeCompteName = $chargeCompte ? $chargeCompte->nom : 'Unknown';
-    
-            // Initialize an array to store data for each charge_compte_id
-            $rowData = [
-                'charge_compte_id' => $chargeCompteId,
-                'charge_compte_name' => $chargeCompteName,
-            ];
-    
-            // Loop through each category
-            foreach ($categories as $category) {
-                // Get the count of entries for the current charge_compte_id, category, and last 12 months
-                $count = Production::where('charge_compte_id', $chargeCompteId)
-                    ->whereHas('act_gestions', function ($query) use ($category) {
-                        $query->where('categorie', $category);
-                    })
-                    ->where('date_traitement', '>=', now()->subMonths(12))
-                    ->where('date_traitement', '<=', now())
-                    ->count();
-    
-                // Store the count in the row data array
-                $rowData[$category] = $count;
-            }
-    
-            // Add the row data to the main data array
-            $dataS[] = $rowData;
+      // Get the unique categories
+    $categories = DB::table('actes_gestion_production_categorie')->pluck('categorie_name');
+
+    // Get unique charge_compte_ids
+    $chargeCompteIds = ChargeCompte::pluck('id');
+
+    // Initialize an array to store the data
+    $dataS = [];
+
+    // Loop through each charge_compte_id
+    foreach ($chargeCompteIds as $chargeCompteId) {
+        // Get the corresponding charge_compte_name
+        $chargeCompte = ChargeCompte::find($chargeCompteId);
+        $chargeCompteName = $chargeCompte ? $chargeCompte->nom : 'Unknown';
+
+        // Initialize an array to store data for each charge_compte_id
+        $rowData = [
+            'charge_compte_id' => $chargeCompteId,
+            'charge_compte_name' => $chargeCompteName,
+        ];
+
+        // Loop through each category
+        foreach ($categories as $category) {
+            // Get the count of entries for the current charge_compte_id, category, and last 12 months
+            $count = Production::where('charge_compte_id', $chargeCompteId)
+                ->whereHas('act_gestions', function ($query) use ($category) {
+                    $query->where('categorie', $category);
+                })
+                ->where('date_traitement', '>=', now()->subMonths(12)->startOfMonth())
+                ->where('date_traitement', '<=', now()->endOfMonth())
+                ->count();
+
+            // Store the count in the row data array
+            $rowData[$category] = $count;
         }
 
-        return ['categories' => $categories, 'dataS' => $dataS];
+        // Add the row data to the main data array
+        $dataS[] = $rowData;
+    }
+
+    return ['categories' => $categories, 'dataS' => $dataS];
     }
 
     public function getCcByActeGestionGproductionInstance()
     {
-        // Get the unique categories from the database
-        $categories = DB::table('actes_gestion_production_categorie')->pluck('categorie_name');
+         // Get the unique categories from the database
+    $categories = DB::table('actes_gestion_production_categorie')->pluck('categorie_name');
 
-        // Get unique charge_compte_ids
-        $chargeCompteIds = ChargeCompte::pluck('id');
+    // Get unique charge_compte_ids
+    $chargeCompteIds = ChargeCompte::pluck('id');
 
-        // Initialize an array to store the data
-        $dataN = [];
+    // Initialize an array to store the data
+    $dataN = [];
 
-        // Loop through each charge_compte_id
-        foreach ($chargeCompteIds as $chargeCompteId) {
-            // Get the corresponding charge_compte_name
-            $chargeCompte = ChargeCompte::find($chargeCompteId);
-            $chargeCompteName = $chargeCompte ? $chargeCompte->nom : 'Unknown';
+    // Loop through each charge_compte_id
+    foreach ($chargeCompteIds as $chargeCompteId) {
+        // Get the corresponding charge_compte_name
+        $chargeCompte = ChargeCompte::find($chargeCompteId);
+        $chargeCompteName = $chargeCompte ? $chargeCompte->nom : 'Unknown';
 
-            // Initialize an array to store data for each charge_compte_id
-            $rowData = [
-                'charge_compte_id' => $chargeCompteId,
-                'charge_compte_name' => $chargeCompteName,
-            ];
+        // Initialize an array to store data for each charge_compte_id
+        $rowData = [
+            'charge_compte_id' => $chargeCompteId,
+            'charge_compte_name' => $chargeCompteName,
+        ];
 
-            // Loop through each category
-            foreach ($categories as $category) {
-                // Get the count of entries for the current charge_compte_id, category, and null date_traitement
-                $count = Production::where('charge_compte_id', $chargeCompteId)
-                    ->whereHas('act_gestions', function ($query) use ($category) {
-                        $query->where('categorie', $category);
-                    })
-                    ->whereNull('date_traitement')
-                    ->groupBy('act_gestion_id') // Group by act_gestion_id
-                    ->count();
+        // Loop through each category
+        foreach ($categories as $category) {
+            // Get the count of entries for the current charge_compte_id, category, and last 12 months
+            $count = Production::where('charge_compte_id', $chargeCompteId)
+                ->whereHas('act_gestions', function ($query) use ($category) {
+                    $query->where('categorie', $category);
+                })
+                ->whereNull('date_traitement')
+                ->where('date_remise', '>=', now()->subMonths(12)->startOfMonth())
+                ->where('date_remise', '<=', now()->endOfMonth())
+                ->count();
 
-                // Store the count in the row data array
-                $rowData[$category] = $count;
-            }
-
-            // Add the row data to the main data array
-            $dataN[] = $rowData;
+            // Store the count in the row data array
+            $rowData[$category] = $count;
         }
 
-        // dd($dataN);
+        // Add the row data to the main data array
+        $dataN[] = $rowData;
+    }
 
-        return ['categories' => $categories, 'dataN' => $dataN];
+    return ['categories' => $categories, 'dataN' => $dataN];
     }
 
     public function showProductionDetails()

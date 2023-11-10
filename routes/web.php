@@ -34,6 +34,8 @@ use App\Http\Controllers\ResponsableController;
 use App\Http\Controllers\SinisterAtRdDetailsController;
 use App\Http\Controllers\SinisterDimDetailsController;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\CheckUserStatus;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,9 +52,9 @@ use App\Http\Controllers\UserController;
 if (!function_exists('set_active')) {
     function set_active($route) {
         if( is_array( $route ) ){
-            return in_array(Request::path(), $route) ? 'active' : '';
+            return in_array(Request::path(), $route) ? 'Active' : '';
         }
-        return Request::path() == $route ? 'active' : '';
+        return Request::path() == $route ? 'Active' : '';
     }
 }
 
@@ -61,16 +63,12 @@ Route::get('/', function () {
     return view('auth.login');
 });
 
+
 Route::group(['middleware'=>'auth'],function()
 {
-    Route::get('accueil',function()
-    {
+    Route::get('accueil', function () {
         return view('accueil');
-    });
-    Route::get('accueil',function()
-    {
-        return view('accueil');
-    });
+    })->middleware('checkUserStatus');
 });
 
 Route::middleware('auth')->group(function () {

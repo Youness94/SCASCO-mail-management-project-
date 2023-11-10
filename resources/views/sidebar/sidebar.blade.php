@@ -90,7 +90,7 @@
                     <ul>
                         <li><a href="{{ route('all.branches') }}">Branchs</a></li>
                         <li><a href="{{ route('all.act_gestions') }}">Actes de gestion</a></li>
-                        <li><a href="{{ route('all.charge_comptes') }}">Chargés ce compte</a></li>
+                        <li><a href="{{ route('all.charge_comptes') }}">Chargés de compte</a></li>
                     </ul>
                 </li>
                 <li class="submenu">
@@ -101,7 +101,7 @@
                     <ul>
                         <li><a href="{{ route('all.branches.sinistres.dim') }}">Branchs</a></li>
                         <li><a href="{{ route('all.acte.gestion.sinistres.dim') }}">Actes de gestion</a></li>
-                        <li><a href="{{ route('all.charge.compte.sinistres.dim') }}">Chargés ce compte</a></li>
+                        <li><a href="{{ route('all.charge.compte.sinistres.dim') }}">Chargés de compte</a></li>
                     </ul>
                 </li>
 
@@ -113,7 +113,7 @@
                     <ul>
                         <li><a href="{{ route('all.branches.sinistres') }}">Branchs</a></li>
                         <li><a href="{{ route('all.acte.gestion.sinistres') }}">Actes de gestion</a></li>
-                        <li><a href="{{ route('all.charge.compte.sinistres') }}">Chargés ce compte</a></li>
+                        <li><a href="{{ route('all.charge.compte.sinistres') }}">Chargés de compte</a></li>
                     </ul>
                 </li>
                 @endif

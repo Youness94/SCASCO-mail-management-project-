@@ -31,7 +31,7 @@
                                     <div class="col-12 col-sm-4">
                                         <div class="form-group local-forms">
                                             <label>Nom<span class="login-danger">*</span></label>
-                                            <input type="text" class="form-control" name="nom" value="{{$branches_sinistres_at_rd->nom}}">
+                                            <input type="text" class="form-control" name="nom" value="{{$branches_dim->nom}}">
                                         </div>
                                     </div>
                                     

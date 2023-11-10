@@ -110,7 +110,20 @@ class ProductionController extends Controller
     }
 
 
+    public function ShowProduction($id)
+    {
+        if (auth()->check()) {
+            // Find the production record by ID along with its related data
+            $production = Production::with(['branches', 'compagnies', 'act_gestions', 'charge_comptes'])
+                ->findOrFail($id);
 
+            // Return the production details view with the related data
+            return view('production.show-production', compact('production'));
+        } else {
+            // User is not authenticated, redirect to the login page
+            return redirect('/login')->with('error', 'Vous devez être connecté pour effectuer cette action');
+        }
+    }
 
     public function StoreProduction(Request $request)
     {
@@ -245,7 +258,6 @@ class ProductionController extends Controller
             'observation' => isset($validatedData['observation']) ? $validatedData['observation'] : null,
             'delai_traitement' => $delaiTraitement, // Update delai_traitement
         ]);
-
         $production->user_id = auth()->user()->id;
         return redirect('/tous/productions')->with('success', 'Production updated successfully');
     }

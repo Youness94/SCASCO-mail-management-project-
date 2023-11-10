@@ -32,7 +32,7 @@
                     </div>
                     <div class="col-lg-3 col-md-4">
                         <button class="btn btn-outline-primary type=" submit">Filtre</button>
-                        <a href="/reset/sinistre_at_rd" class="btn btn-outline-warning">Réinitialiser</a>
+                        <a href="/reset/sinistre-at-rd" class="btn btn-outline-warning">Réinitialiser</a>
                     </div>
 
                 </div>

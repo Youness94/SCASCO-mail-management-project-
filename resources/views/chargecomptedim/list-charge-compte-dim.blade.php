@@ -57,7 +57,7 @@
                                     </td>
                                     
                                     <td>
-                                        <a href="{{route('edit.charge.compte.sinistre',$item->id)}}" class="btn btn-inverse-warning"><i class="feather-edit"></i></a>
+                                        <a href="{{route('edit.charge.compte.sinistre.dim',$item->id)}}" class="btn btn-inverse-warning"><i class="feather-edit"></i></a>
                                     </td>
                                     <td>
                                         <a href="{{route('delete.charge.compte.sinistre.dim',$item->id)}}"  class="btn btn-inverse-danger"><i class="feather-trash"></i></a>

@@ -121,26 +121,27 @@ class UserController extends Controller
     $user->save();
 
     // Redirect to a success page or return a response
-    return redirect('/tous/users')->with('success', 'User updated successfully');
+    return redirect('/tous/users')->with('success', 'Utilisateur modifié avec succès');
 }
     public function DeleteUser($id)
     {
-        $user = User::find($id);
+         // Find the user by ID
+    $user = User::find($id);
 
-        // Check if the user exists
-        if (!$user) {
-            return redirect('/tous/users')->with('error', 'User not found');
-        }
+    // Check if the user exists
+    if (!$user) {
+        return redirect('/tous/users')->with('error', 'Utilisateur non trouvé');
+    }
 
-        // Handle image deletion if the user has a photo
-        if ($user->photo) {
-            Storage::delete($user->photo); // Delete the user's photo from storage
-        }
+    // Handle image deletion if the user has a photo
+    if ($user->photo) {
+        Storage::delete($user->photo); // Delete the user's photo from storage
+    }
 
-        // Delete the user
-        $user->delete();
+    // Delete the user
+    $user->delete();
 
-        // Redirect to a success page or return a response
-        return redirect('/tous/users')->with('success', 'User deleted successfully');
+    // Redirect to a success page or return a response
+    return redirect('/tous/users')->with('success', 'Utilisateur supprimé avec succès');
     }
 }

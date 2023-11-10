@@ -32,17 +32,17 @@ class LoginController extends Controller
     use AuthenticatesUsers;
 
     /**
-    * Where to redirect users after login.
-    *
-    * @var string
-    */
+     * Where to redirect users after login.
+     *
+     * @var string
+     */
     protected $redirectTo = RouteServiceProvider::HOME;
 
     /**
-    * Create a new controller instance.
-    *
-    * @return void
-    */
+     * Create a new controller instance.
+     *
+     * @return void
+     */
     public function __construct()
     {
         $this->middleware('guest')->except([
@@ -54,30 +54,35 @@ class LoginController extends Controller
     /** index page login */
     public function login()
     {
+
         return view('auth.login');
     }
 
     /** login with databases */
     public function authenticate(Request $request)
-    {
-        $request->validate([
-            'email'    => 'required|string',
-            'password' => 'required|string',
-            
-        ]);
-        
-        DB::beginTransaction();
-        try {
-            
-            $email     = $request->email;
-            $password  = $request->password;
+{
+    $request->validate([
+        'email' => 'required|string',
+        'password' => 'required|string',
+    ]);
 
-            if (Auth::attempt(['email'=>$email,'password'=>$password])) {
-                /** get session */
-                $user = Auth::User();
+    DB::beginTransaction();
+
+    try {
+        $email = $request->email;
+        $password = $request->password;
+
+        // Check if the user is active
+        $user = User::where('email', $email)
+            ->first();
+
+        if ($user) {
+            if ($user->status === 'Active' && Auth::attempt(['email' => $email, 'password' => $password])) {
+                // Authentication successful for an active user
+                $user = Auth::user();
                 Session::put('name', $user->name);
                 Session::put('email', $user->email);
-                Session::put('user_id', $user->user_id);
+                Session::put('user_id', $user->id); // Use 'id' instead of 'user_id'
                 Session::put('join_date', $user->join_date);
                 Session::put('phone_number', $user->phone_number);
                 Session::put('status', $user->status);
@@ -85,22 +90,26 @@ class LoginController extends Controller
                 Session::put('photo', $user->photo);
                 Session::put('position', $user->position);
                 Session::put('department', $user->department);
-                Toastr::success('Login successfully :)','Success');
+                Toastr::success('Login successfully :)', 'Success');
+                DB::commit(); // Commit the transaction
                 return redirect()->intended('accueil');
             } else {
-                Toastr::error('fail, WRONG USERNAME OR PASSWORD :)','Error');
-                return redirect('login');
+                Toastr::error('Login failed. Your account is inactive or disabled :(', 'Error');
             }
-           
-        } catch(\Exception $e) {
-            DB::rollback();
-            Toastr::error('fail, LOGIN :)','Error');
-            return redirect()->back();
+        } else {
+            Toastr::error('Login failed. Wrong username or password :(', 'Error');
         }
+
+        return redirect('login');
+    } catch (\Exception $e) {
+        DB::rollBack(); // Rollback the transaction on error
+        Toastr::error('Login failed :(', 'Error');
+        return redirect()->back();
     }
+}
 
     /** logout */
-    public function logout( Request $request)
+    public function logout(Request $request)
     {
         Auth::logout();
         // forget login session
@@ -116,7 +125,7 @@ class LoginController extends Controller
         $request->session()->forget('department');
         $request->session()->flush();
 
-        Toastr::success('Logout successfully :)','Success');
+        Toastr::success('Logout successfully :)', 'Success');
         return redirect('login');
     }
 
@@ -143,5 +152,3 @@ class LoginController extends Controller
         }
     }
 }
-
-

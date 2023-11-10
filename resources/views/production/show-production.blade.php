@@ -28,7 +28,7 @@
                             <h1 class="form-title" style="font-size: 2vw; display: inline-block;">{{ $production->nom_police }}</h1>
                         </div>
                         <div class="col ms-md-n2 ">
-                            <div style="font-size: 1vw;" class="text-warning">Nom de police:</div>
+                            <div style="font-size: 1vw;" class="text-warning">Créé par: </div>
                             <h1 class="form-title" style="font-size: 1vw; display: inline-block;">{{ optional($production->user)->name }}</h1>
                         </div>
                     </div>

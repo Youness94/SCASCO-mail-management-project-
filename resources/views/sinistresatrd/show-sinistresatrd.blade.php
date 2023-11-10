@@ -25,8 +25,12 @@
 
                         </div>
                         <div class="col ms-md-n2 profile-user-info">
-                            <strong style="font-size: 3vw; display: inline-block; margin-right: 10px;">Nom de police:</strong>
+                            <div style="font-size: 3vw;" class="text-warning">Nom de police:</div>
                             <h1 class="form-title" style="font-size: 2vw; display: inline-block;">{{ $sinistres->nom_police }}</h1>
+                        </div>
+                        <div class="col ms-md-n2 ">
+                            <div style="font-size: 1vw;" class="text-warning">Créé par: </div>
+                            <h1 class="form-title" style="font-size: 1vw; display: inline-block;">{{ optional($sinistres->user)->name }}</h1>
                         </div>
                     </div>
                 </div>
@@ -37,41 +41,40 @@
                             <div class="col-lg-12">
                                 <div class="card">
                                     <div class="card-body">
-
-                                        <div class="row">
-                                            <strong>Branche:</strong>
+                                    <div class="row">
+                                            <div style="font-size: 2vw;" class="text-warning">Branche:</div>
                                             <h5>{{ optional($sinistres->branches_sinistres)->nom }}</h5>
                                         </div>
                                         <div class="row">
-                                            <strong>Compagnie:</strong>
+                                            <div style="font-size: 2vw;" class="text-warning">Compagnie:</div>
                                             <h5>{{ optional($sinistres->compagnies)->nom }}</h5>
                                         </div>
                                         <div class="row">
-                                            <strong>Acte de gestion:</strong>
+                                            <div style="font-size: 2vw;" class="text-warning">Acte de gestion:</div>
                                             <h5>{{ optional($sinistres->acte_de_gestion_sinistres)->nom }}</h5>
                                         </div>
                                         <div class="row">
-                                            <strong>Chargé de comptes:</strong>
+                                            <div style="font-size: 2vw;" class="text-warning">Chargé de comptes:</div>
                                             <h5>{{ optional($sinistres->charge_compte_sinistres)->nom }}</h5>
                                         </div>
                                         <div class="row">
-                                            <strong>Date de Reception:</strong>
+                                            <div style="font-size: 2vw;" class="text-warning">Date de Reception:</div>
                                             <h5> {{ $sinistres->date_reception }}</h5>
                                         </div>
                                         <div class="row">
-                                            <strong>Date de Remise:</strong>
+                                            <div style="font-size: 2vw;" class="text-warning">Date de Remise:</div>
                                             <h5> {{ $sinistres->date_remise }}</h5>
                                         </div>
                                         <div class="row">
-                                            <strong>Date de traitement:</strong>
+                                            <div style="font-size: 2vw;" class="text-warning">Date de traitement:</div>
                                             <h5> {{ $sinistres->date_traitement }}</h5>
                                         </div>
                                         <div class="row">
-                                            <strong>Délai de traitement:</strong>
+                                            <div style="font-size: 2vw;" class="text-warning">Délai de traitement:</div>
                                             <h5>{{ $sinistres->delai_traitement }} /Jours</h5>
                                         </div>
                                         <div class="row">
-                                            <strong>Observation:</strong>
+                                            <div style="font-size: 2vw;" class="text-warning">Observation:</div>
                                             <h5> {{ $sinistres->observation }}</h5>
                                         </div>
 
