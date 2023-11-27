@@ -6,24 +6,38 @@
 
 <div class="page-wrapper">
       <div class="content container-fluid">
-      <div class="page-header">
-            <div class="row align-items-center">
-                <div class="col-sm-12">
-                    <div class="page-sub-header">
-                        <h3 class="page-title">Ajouter Utilisateur</h3>
-                        <ul class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="{{ route('all.users') }}">Liste des Utilisateurs</a></li>
-                            <li class="breadcrumb-item active">Ajouter Utilisateur</li>
-                        </ul>
-                    </div>
-                </div>
+            <div class="page-header">
+                  <div class="row align-items-center">
+                        <div class="col-sm-12">
+                              <div class="page-sub-header">
+                                    <h3 class="page-title">Ajouter Utilisateur</h3>
+                                    <ul class="breadcrumb">
+                                          <li class="breadcrumb-item"><a href="{{ route('all.users') }}">Liste des Utilisateurs</a></li>
+                                          <li class="breadcrumb-item active">Ajouter Utilisateur</li>
+                                    </ul>
+                              </div>
+                        </div>
+                  </div>
             </div>
-        </div>
 
             <div class="row">
                   <div class="col-sm-12">
                         <div class="card comman-shadow">
                               <div class="card-body">
+                                    {{-- Display success message --}}
+                                    @if(Session::has('success'))
+                                    <div class="alert alert-success">
+                                          {{ Session::get('success') }}
+                                    </div>
+                                    @endif
+
+                                    {{-- Display error message --}}
+                                    @if(Session::has('error'))
+                                    <div class="alert alert-danger">
+                                          {{ Session::get('error') }}
+                                    </div>
+                                    @endif
+
                                     {{-- Add User Form --}}
                                     <form method="POST" action="{{ route('store.user') }}" class="forms-sample" enctype="multipart/form-data">
                                           @csrf
@@ -32,12 +46,24 @@
                                           <div class="form-group local-forms">
                                                 <label>Name: <span class="login-danger">*</span></label>
                                                 <input type="text" class="form-control" name="name" required>
+                                                @error('name')
+                                                <span class="invalid-feedback" role="alert">
+                                                      <strong>{{ $message }}</strong>
+                                                </span>
+                                                @enderror
                                           </div>
+
 
                                           <div class="form-group local-forms">
                                                 <label>Email: <span class="login-danger">*</span></label>
                                                 <input type="email" class="form-control" name="email" required>
+                                                @error('email')
+                                                <span class="invalid-feedback" role="alert">
+                                                      <strong>{{ $message }}</strong>
+                                                </span>
+                                                @enderror
                                           </div>
+
 
                                           <div class="form-group local-forms">
                                                 <label>Role Name <span class="login-danger">*</span></label>
@@ -60,6 +86,11 @@
                                                 <label>Password: <span class="login-danger">*</span></label>
                                                 <input type="password" class="form-control" name="password" required>
                                           </div>
+                                          @error('password')
+                                          <span class="invalid-feedback" role="alert">
+                                                <strong>{{ $message }}</strong>
+                                          </span>
+                                          @enderror
 
                                           <div class="form-group">
                                                 <button type="submit" class="btn btn-primary">Add User</button>

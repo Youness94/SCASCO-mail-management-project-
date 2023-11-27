@@ -39,7 +39,7 @@ class UserManagementController extends Controller
     // Validate the request data
     $request->validate([
         'name' => 'required',
-        'email' => 'required|email',
+        'email' => 'required|email|unique:users',
         'role_name' => 'required',
         'password' => 'required|min:8',
     ]);
